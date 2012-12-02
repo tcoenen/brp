@@ -2,6 +2,7 @@
 Module containing the base class for all plotters (defining their API).
 '''
 
+
 class BasePlotter(object):
     '''Base class for ..Plotter class definitions, defines interface.'''
     def __init__(self):
