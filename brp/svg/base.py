@@ -6,17 +6,14 @@ from xml.sax.saxutils import escape
 
 from brp.svg.plotters.axes import LeftAxisPlotter
 from brp.svg.plotters.axes import BottomAxisPlotter
-from brp.svg.plotters.axes import TopAxisPlotter 
+from brp.svg.plotters.axes import TopAxisPlotter
 from brp.svg.plotters.axes import RightAxisPlotter
 
 from brp.core.bbox import stretch_bbox
-from brp.core.constants import HARDCODED_STRETCH
 from brp.core.transform import setup_transforms
 
 from brp.svg.et_import import ET
 from brp.svg.constants import AXIS_SIZE, FONT_SIZE, DATA_PADDING
-
-import sys
 
 
 class SVGCanvas(object):
@@ -44,7 +41,7 @@ class SVGCanvas(object):
 
         '''
         self.containers.append(plot_container)
-    
+
     def draw(self, file):
         '''
         Draw all plot.
@@ -60,15 +57,14 @@ class SVGCanvas(object):
         root.set('height', '%.2f' % self.height)
         root.set('width', '%.2f' % self.width)
         root.set('version', '1.1')
-        # TODO : Figure out the exact corner coordinates given width and 
+        # TODO : Figure out the exact corner coordinates given width and
         # height for an SVG file.
         rect = ET.SubElement(root, 'rect')
         rect.set('x', '0')
         rect.set('y', '0')
-        rect.set('width', '%.2f' % self.width) 
-        rect.set('height', '%.2f' % self.height) 
+        rect.set('width', '%.2f' % self.width)
+        rect.set('height', '%.2f' % self.height)
         rect.set('fill', self.background_color)
-
 
         for c in self.containers:
             c.draw(root)
@@ -76,10 +72,11 @@ class SVGCanvas(object):
         tree = ET.ElementTree(root)
         tree.write(file)
 
+
 class PlotContainer(object):
     '''
-    Complete plot (axes + drawing). 
-    
+    Complete plot (axes + drawing).
+
     Keeps state and acts as a container for BasePlotter sub-classes.
     '''
     def __init__(self, x_offset, y_offset, width, height, **kwargs):
@@ -96,22 +93,26 @@ class PlotContainer(object):
         Keyword arguments :
             * `background_color` --- String, HTML/SVG color. This is currently
               not checked for validity, wrong colors can cause problems with
-              the generated SVG. 
+              the generated SVG.
             * `data_padding` --- Integer, number of svg units (pixels) to use
               as padding around the plot inside of the axis.
         '''
         self.update_svg_bbox(x_offset, y_offset, width, height)
         self.data_bbox = None
         self.plot_layers = []
- 
+
         self.background_color = kwargs.get('background_color', None)
         self.color = kwargs.get('color', 'black')
         self.data_padding = kwargs.get('data_padding', DATA_PADDING)
- 
-        self.left = LeftAxisPlotter(log=kwargs.get('y_log', False), color=self.color)
-        self.top = TopAxisPlotter(log=kwargs.get('x_log', False), color=self.color)
-        self.right = RightAxisPlotter(log=kwargs.get('y_log', False), color=self.color)
-        self.bottom = BottomAxisPlotter(log=kwargs.get('x_log', False), color=self.color)
+
+        self.left = LeftAxisPlotter(log=kwargs.get('y_log', False),
+                                    color=self.color)
+        self.top = TopAxisPlotter(log=kwargs.get('x_log', False),
+                                  color=self.color)
+        self.right = RightAxisPlotter(log=kwargs.get('y_log', False),
+                                      color=self.color)
+        self.bottom = BottomAxisPlotter(log=kwargs.get('x_log', False),
+                                        color=self.color)
 
         self.draw_axes = True
 
@@ -119,15 +120,15 @@ class PlotContainer(object):
         '''
         Update boundingbox for SVG drawing.
         '''
-        self.svg_bbox = [x_offset, y_offset, x_offset + width, 
-            y_offset + height]
-    
+        self.svg_bbox = [x_offset, y_offset, x_offset + width,
+                         y_offset + height]
+
     def add_plotter(self, plotter):
         '''
         Add a BasePlotter sub-class instance to this PlotContainer.
         '''
         self.plot_layers.append(plotter)
-    
+
     def draw(self, root_element):
         '''Draw this PlotContainer.'''
         # Add the *AxisPlotter to the plot_layers
@@ -136,7 +137,7 @@ class PlotContainer(object):
             self.plot_layers.append(self.right)
             self.plot_layers.append(self.left)
             self.plot_layers.append(self.bottom)
-        
+
         # Find the boundingbox that contains all data.
         for plotter in self.plot_layers:
             self.data_bbox = plotter.prepare_bbox(self.data_bbox)
@@ -154,7 +155,7 @@ class PlotContainer(object):
         self.data_bbox = stretch_bbox(self.data_bbox, x_factor, y_factor,
             self.top.kwargs['log'] or self.bottom.kwargs['log'],
             self.left.kwargs['log'] or self.right.kwargs['log'],)
-        
+
         # Comunicate to each *Plotter object the data bounding box and the
         # SVG plot bounding box.
         for plotter in self.plot_layers:
@@ -169,37 +170,38 @@ class PlotContainer(object):
         x_min, y_min, x_max, y_max = self.data_bbox
         # Note: SVG has its coordinates 'upside down'
         svg_target_bbox = (svg_x_min + AXIS_SIZE, svg_y_max - AXIS_SIZE,
-            svg_x_max - AXIS_SIZE, svg_y_min + AXIS_SIZE)
+                           svg_x_max - AXIS_SIZE, svg_y_min + AXIS_SIZE)
 
-        xtr, ytr = setup_transforms(self.data_bbox, svg_target_bbox, 
+        xtr, ytr = setup_transforms(self.data_bbox, svg_target_bbox,
             x_log=self.top.kwargs['log'] or self.bottom.kwargs['log'],
-            y_log=self.left.kwargs['log'] or self.right.kwargs['log'] 
-        ) 
+            y_log=self.left.kwargs['log'] or self.right.kwargs['log']
+        )
 
         # Draw background color (or not).
         if self.background_color:
-            ET.SubElement(root_element, 'rect', fill=self.background_color, 
-                x='%.2f' % svg_x_min, 
-                y='%.2f' % svg_y_min, 
-                width='%.2f' % (svg_x_max - svg_x_min), 
-                height='%.2f' % (svg_y_max - svg_y_min),
-            )
+            ET.SubElement(root_element, 'rect', fill=self.background_color,
+                          x='%.2f' % svg_x_min,
+                          y='%.2f' % svg_y_min,
+                          width='%.2f' % (svg_x_max - svg_x_min),
+                          height='%.2f' % (svg_y_max - svg_y_min))
 
-        # Draw all the parts of the plot.        
+        # Draw all the parts of the plot.
         for p_layer in self.plot_layers:
             p_layer.draw(root_element, xtr, ytr)
-        
+
         # Remove the *AxisPlotters from the parts of the plot again.
         if self.draw_axes:
             self.plot_layers = self.plot_layers[0:-4]
         self.data_bbox = None
 
         if False:
-            rect = ET.SubElement(root_element, 'rect')        
+            rect = ET.SubElement(root_element, 'rect')
             rect.set('x', '%.2f' % (self.svg_bbox[0] + DATA_PADDING))
             rect.set('y', '%.2f' % (self.svg_bbox[1] + DATA_PADDING))
-            rect.set('width', '%.2f' % (self.svg_bbox[2] - self.svg_bbox[0] - 2 * DATA_PADDING))
-            rect.set('height', '%.2f' % (self.svg_bbox[3] - self.svg_bbox[1] - 2 * DATA_PADDING))
+            rect.set('width', '%.2f' % (self.svg_bbox[2] - self.svg_bbox[0] -
+                     2 * DATA_PADDING))
+            rect.set('height', '%.2f' % (self.svg_bbox[3] - self.svg_bbox[1] -
+                     2 * DATA_PADDING))
             rect.set('stroke', 'blue')
             rect.set('fill', 'none')
 
@@ -239,11 +241,10 @@ class TextFragment(object):
             # TODO add validation to check that self.link is in fact an URL
             root_element.set('xlink:href', self.link)
         tf = ET.SubElement(root_element, 'text')
-        tf.set('x', '%.2f' % self.x) 
+        tf.set('x', '%.2f' % self.x)
         tf.set('y', '%.2f' % self.y)
         tf.set('font-size', self.font_size)
         tf.set('text-anchor', self.alignment)
         tf.set('fill', self.color)
 #        tf.set('stroke', self.color)
         tf.text = escape(self.text)
-
