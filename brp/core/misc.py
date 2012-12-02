@@ -1,3 +1,0 @@
-'''
-Some utility code.
-'''

@@ -8,10 +8,11 @@ following entries: [xmin, ymin, xmax, ymax]
 from __future__ import division
 from math import log10
 
-def find_bounding_box(lx, ly, bbox = None):
+
+def find_bounding_box(lx, ly, bbox=None):
     '''
     Find bounding box given list of numbers for x and y.
-    
+
     Bounding box is given as [xmin, ymin, xmax, ymax].
     Note : assumes that lx and ly can be accessed by index.
 
@@ -29,7 +30,7 @@ def find_bounding_box(lx, ly, bbox = None):
         A tuple representing a bounding box : (xmin, ymin, xmax, ymax).
     '''
     if not bbox:
-        bbox = [lx[0], ly[0], lx[0], ly[0]] # [xmin, ymin, xmax, ymax]
+        bbox = [lx[0], ly[0], lx[0], ly[0]]  # [xmin, ymin, xmax, ymax]
     else:
         bbox = list(bbox)
     for x, y in zip(lx, ly):
@@ -47,23 +48,23 @@ def find_bounding_box(lx, ly, bbox = None):
 def stretch_bbox(bbox, x_factor, y_factor, x_log, y_log):
     '''
     Stretch the size of a bounding box by some factor.
-    
+
     Arguments:
 
         * `bbox` -- Bounding box, tuple/list like: (xmin, ymin, xmax, ymax)
         * `x_factor` -- Factor by which to stretch the X bounding box.
         * `y_factor` -- Factor by which to stretch the Y bounding box.
-        * `x_log` -- Boolean, True if x axis should be treated as logarithmic 
+        * `x_log` -- Boolean, True if x axis should be treated as logarithmic
           default False.
-        * `y_log` -- Boolean, True if y axis should be treated as logarithmic 
+        * `y_log` -- Boolean, True if y axis should be treated as logarithmic
           default False.
-    
+
     Returns:
         A tuple representing a bounding box : (xmin, ymin, xmax, ymax).
- 
+
     Note:
-        In case logarithmic transforms are needed the stretch is performed 
-        such that the result looks the same as the linear case as this 
+        In case logarithmic transforms are needed the stretch is performed
+        such that the result looks the same as the linear case as this
         function is used for creating the margins around the datapoints in a
         graph.
     '''
@@ -93,8 +94,9 @@ def stretch_bbox(bbox, x_factor, y_factor, x_log, y_log):
 
     return tuple(tmp)
 
+
 def combine_bbox(bbox1, bbox2):
     bbox1 = list(bbox1)
     bbox2 = list(bbox2)
     return tuple([min(bbox1[0], bbox2[0]), min(bbox1[1], bbox2[1]),
-        max(bbox1[2], bbox2[2]), max(bbox1[3], bbox2[3])])
+                 max(bbox1[2], bbox2[2]), max(bbox1[3], bbox2[3])])
