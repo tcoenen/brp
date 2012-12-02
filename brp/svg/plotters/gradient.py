@@ -5,6 +5,7 @@ import copy
 from brp.svg.plotters.base import BasePlotter
 from brp.svg.et_import import ET
 
+
 class RGBGradient(object):
     def __init__(self, interval, rgb1, rgb2, *args, **kwargs):
         # colors channels have values between 0 and 1
@@ -17,9 +18,9 @@ class RGBGradient(object):
         self.max_value_color = kwargs.get('max_value_color', (1, 1, 1))
 
     def get_color(self, value):
-        if self.min_value != None and value < self.min_value:
+        if self.min_value is not None and value < self.min_value:
             return self.min_value_color
-        if self.max_value != None and value > self.max_value:
+        if self.max_value is not None and value > self.max_value:
             return self.max_value_color
 
         if value < self.interval[0]:
@@ -35,18 +36,19 @@ class RGBGradient(object):
         ds = hls2[2] - hls1[2]
 
         rgb = colorsys.hls_to_rgb(hls1[0] + dv * dh, hls1[1] + dv * dl,
-            hls1[2] + dv * ds)
+                                  hls1[2] + dv * ds)
         return rgb
-    
+
     def get_css_color(self, value):
         red, green, blue = self.get_color(value)
         return '#%02x%02x%02x' % (255 * red, 255 * green, 255 * blue)
+
 
 class BWGradient(RGBGradient):
     def __init__(self, interval, *args, **kwargs):
         # colors channels have values between 0 and 1
         self.interval = interval
-        self.rgb1 = (0.2, 0.2, 0.2) 
+        self.rgb1 = (0.2, 0.2, 0.2)
         self.rgb2 = (0.9, 0.9, 0.9)
 
     def get_color(self, value):
@@ -65,11 +67,11 @@ class GradientPlotter(BasePlotter):
     def __init__(self, gradient):
         self.gradient = copy.deepcopy(gradient)
 
-        if self.gradient.min_value != None:
+        if self.gradient.min_value is not None:
             min_value = min(self.gradient.interval[0], self.gradient.min_value)
         else:
             min_value = self.gradient.interval[0]
-        if self.gradient.max_value != None:
+        if self.gradient.max_value is not None:
             max_value = max(self.gradient.interval[1], self.gradient.max_value)
         else:
             max_value = self.gradient.interval[1]
@@ -79,7 +81,7 @@ class GradientPlotter(BasePlotter):
 
         self.min_value = mean - 1.1 * half_range
         self.max_value = mean + 1.1 * half_range
-    
+
     def prepare_bbox(self, data_bbox):
         return (0, self.min_value, 1, self.max_value)
 
@@ -103,13 +105,9 @@ class GradientPlotter(BasePlotter):
             rect.set('width', '%.2f' % (x2 - x1))
             y1 = y_transform(min_value)
             y2 = y_transform(max_value)
-            if y1 > y2: y2, y1 = y1, y2
+            if y1 > y2:
+                y2, y1 = y1, y2
             rect.set('y', '%.2f' % y1)
             rect.set('height', '%.2f' % (y2 - y1))
             rect.set('fill', color)
             rect.set('stroke', color)
-            
-
-
-    
-
