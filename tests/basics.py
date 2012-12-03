@@ -1,6 +1,6 @@
 import sys
 import random
-sys.path.append('../')
+#sys.path.append('../')
 
 from brp.svg.base import SVGCanvas
 from brp.svg.base import PlotContainer
