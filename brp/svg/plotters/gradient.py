@@ -64,8 +64,12 @@ class BWGradient(RGBGradient):
 
 # slightly hackish, but ...
 class GradientPlotter(BasePlotter):
-    def __init__(self, gradient):
+    def __init__(self, gradient, orientation='vertical'):
         self.gradient = copy.deepcopy(gradient)
+        if not orientation in ['vertical', 'horizontal']:
+            self.orientation = 'vertical'
+        else:
+            self.orientation = orientation
 
         if self.gradient.min_value is not None:
             min_value = min(self.gradient.interval[0], self.gradient.min_value)
@@ -83,31 +87,54 @@ class GradientPlotter(BasePlotter):
         self.max_value = mean + 1.1 * half_range
 
     def prepare_bbox(self, data_bbox):
-        return (0, self.min_value, 1, self.max_value)
+        if self.orientation == 'vertical':
+            tmp = (0, self.min_value, 1, self.max_value)
+        else:
+            tmp = (self.min_value, 0, self.max_value, 1)
+        return tmp
 
     def done_bbox(self, data_bbox, svg_bbox):
         self.svg_bbox = copy.copy(svg_bbox)
         self.data_bbox = copy.copy(data_bbox)
 
     def draw(self, root_element, x_transform, y_transform, **kwargs):
-
-        x1, x2 = x_transform(0), x_transform(1)
         N_STEPS = 400
         interval_length = self.max_value - self.min_value
         d_value = interval_length / N_STEPS
-        for i in range(N_STEPS):
-            min_value = self.min_value + i * d_value
-            max_value = min_value + d_value
 
-            color = self.gradient.get_css_color((min_value + max_value) / 2)
-            rect = ET.SubElement(root_element, 'rect')
-            rect.set('x', '%.2f' % x1)
-            rect.set('width', '%.2f' % (x2 - x1))
-            y1 = y_transform(min_value)
-            y2 = y_transform(max_value)
-            if y1 > y2:
-                y2, y1 = y1, y2
-            rect.set('y', '%.2f' % y1)
-            rect.set('height', '%.2f' % (y2 - y1))
-            rect.set('fill', color)
-            rect.set('stroke', color)
+        if self.orientation == 'vertical':
+            x1, x2 = x_transform(0), x_transform(1)
+            for i in range(N_STEPS):
+                min_value = self.min_value + i * d_value
+                max_value = min_value + d_value
+                color = self.gradient.get_css_color((min_value + max_value) / 2)
+
+                rect = ET.SubElement(root_element, 'rect')
+                rect.set('x', '%.2f' % x1)
+                rect.set('width', '%.2f' % (x2 - x1))
+                y1 = y_transform(min_value)
+                y2 = y_transform(max_value)
+                if y1 > y2:
+                    y2, y1 = y1, y2
+                rect.set('y', '%.2f' % y1)
+                rect.set('height', '%.2f' % (y2 - y1))
+                rect.set('fill', color)
+                rect.set('stroke', color)
+        else:
+            y1, y2 = y_transform(0), y_transform(1)
+            for i in range(N_STEPS):
+                min_value = self.min_value + i * d_value
+                max_value = min_value + d_value
+                color = self.gradient.get_css_color((min_value + max_value) / 2)
+
+                rect = ET.SubElement(root_element, 'rect')
+                rect.set('y', '%.2f' % y2)
+                rect.set('height', '%.2f' % (y1 - y2))
+                x1 = x_transform(min_value)
+                x2 = x_transform(max_value)
+                if x1 > x2:
+                    x2, x1 = x1, x2
+                rect.set('x', '%.2f' % x1)
+                rect.set('width', '%.2f' % (x2 - x1))
+                rect.set('fill', color)
+                rect.set('stroke', color)
