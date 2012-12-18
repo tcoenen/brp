@@ -22,7 +22,7 @@ def get_tickmarks(length, interval, use_log, **options):
 
 
 def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
-    interval, use_log, **options):
+                   interval, use_log, **options):
     '''
     Draw left axis.
 
@@ -51,14 +51,21 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
         `hide_tickmarklabels` --- Boolean, True if tickmarks and labels for
             this axis should be hidden.
     '''
+
     color = options.get('color', 'black')
 
-    line = ET.SubElement(root_element, 'line')
+    axes_lines = ET.SubElement(root_element, 'g')
+    axes_lines.set('stroke', color)
+
+    axes_text = ET.SubElement(root_element, 'g')
+    axes_text.set('fill', color)
+
+
+    line = ET.SubElement(axes_lines, 'line')
     line.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
     line.set('x2', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y2', '%.2f' % (y_offset + height - AXIS_SIZE))
-    line.set('stroke', color)
 
     hide_tickmarks = options.get('hide_tickmarks', False)
 
@@ -68,7 +75,7 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
 
         for y, size in tickmarks:
             ny = y_transform(y)
-            tm = ET.SubElement(root_element, 'line')
+            tm = ET.SubElement(axes_lines, 'line')
             tm.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
             tm.set('x2', '%.2f' % (x_offset + AXIS_SIZE + size * 0.7))
             tm.set('y1', '%.2f' % (ny))
@@ -80,7 +87,7 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
             if size != 10:
                 continue
 
-            ticklabel = ET.SubElement(root_element, 'text')
+            ticklabel = ET.SubElement(axes_text, 'text')
             ticklabel.set('font-size', str(FONT_SIZE))
             ticklabel.set('text-anchor', 'middle')
             ticklabel.set('x', '%.2f' % (x_offset + AXIS_SIZE -
@@ -88,17 +95,16 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
             ticklabel.set('y', '%.2f' % ny)
             ticklabel.set('transform', 'rotate(%d %.2f %.2f)' %
                 (-90, x_offset + AXIS_SIZE - TICKMARK_LABEL_SPACING, ny))
-            ticklabel.set('fill', color)
             ticklabel.text = escape(str(y))
 
     hide_label = options.get('hide_label', False)
     label_link = options.get('label_link', None)
     if not hide_label:
         if label_link:
-            root_element = ET.SubElement(root_element, 'a')
-            root_element.set('xlink:href', label_link)
+            axes_text = ET.SubElement(axes_text, 'a')
+            axes_text.set('xlink:href', label_link)
 
-        lbl = ET.SubElement(root_element, 'text')
+        lbl = ET.SubElement(axes_text, 'text')
         lbl.set('font-size', str(FONT_SIZE))
         lbl.set('text-anchor', 'middle')
         lbl.set('x', '%.2f' % (x_offset + AXIS_SIZE -
@@ -108,12 +114,11 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
                 (-90, x_offset + AXIS_SIZE - TICKMARK_LABEL_SPACING - 2 *
                  FONT_SIZE, y_offset + 0.5 * height))
         label = options.get('label', 'Y LABEL')
-        lbl.set('fill', color)
         lbl.text = escape(label)
 
 
 def draw_top_axis(root_element, x_offset, y_offset, width, x_transform,
-    interval, use_log, **options):
+                  interval, use_log, **options):
     '''
     Draw top axis.
 
@@ -121,12 +126,17 @@ def draw_top_axis(root_element, x_offset, y_offset, width, x_transform,
     '''
     color = options.get('color', 'black')
 
-    line = ET.SubElement(root_element, 'line')
+    axes_lines = ET.SubElement(root_element, 'g')
+    axes_lines.set('stroke', color)
+
+    axes_text = ET.SubElement(root_element, 'g')
+    axes_text.set('fill', color)
+
+    line = ET.SubElement(axes_lines, 'line')
     line.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
     line.set('x2', '%.2f' % (x_offset + width - AXIS_SIZE))
     line.set('y2', '%.2f' % (y_offset + AXIS_SIZE))
-    line.set('stroke', color)
 
     hide_tickmarks = options.get('hide_tickmarks', False)
 
@@ -136,34 +146,32 @@ def draw_top_axis(root_element, x_offset, y_offset, width, x_transform,
 
         for x, size in tickmarks:
             nx = x_transform(x)
-            tm = ET.SubElement(root_element, 'line')
+            tm = ET.SubElement(axes_lines, 'line')
             tm.set('x1', '%.2f' % (nx))
             tm.set('x2', '%.2f' % (nx))
             tm.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
             tm.set('y2', '%.2f' % (y_offset + AXIS_SIZE + size * 0.7))
-            tm.set('stroke', color)
 
             if hide_tickmarklabels:
                 continue
             if size != 10:
                 continue
 
-            ticklabel = ET.SubElement(root_element, 'text')
+            ticklabel = ET.SubElement(axes_text, 'text')
             ticklabel.set('font-size', str(FONT_SIZE))
             ticklabel.set('text-anchor', 'middle')
             ticklabel.set('y', '%.2f' %
                           (y_offset + AXIS_SIZE - TICKMARK_LABEL_SPACING)),
             ticklabel.set('x', '%.2f' % nx)
-            ticklabel.set('fill', color)
             ticklabel.text = escape(str(x))
 
     hide_label = options.get('hide_label', False)
     label_link = options.get('label_link', None)
     if not hide_label:
         if label_link:
-            root_element = ET.SubElement(root_element, 'a')
-            root_element.set('xlink:href', label_link)
-        lbl = ET.SubElement(root_element, 'text')
+            axes_text = ET.SubElement(axes_text, 'a')
+            axes_text.set('xlink:href', label_link)
+        lbl = ET.SubElement(axes_text, 'text')
         lbl.set('font-size', str(FONT_SIZE))
         lbl.set('text-anchor', 'middle')
         lbl.set('y', '%.2f' %
@@ -171,12 +179,11 @@ def draw_top_axis(root_element, x_offset, y_offset, width, x_transform,
                     2 * FONT_SIZE)),
         lbl.set('x', '%.2f' % (x_offset + 0.5 * width))
         label = options.get('label', 'X LABEL')
-        lbl.set('fill', color)
         lbl.text = escape(label)
 
 
 def draw_bottom_axis(root_element, x_offset, y_offset, width, x_transform,
-    interval, use_log, **options):
+                     interval, use_log, **options):
     '''
     Draw bottom axis.
 
@@ -184,12 +191,17 @@ def draw_bottom_axis(root_element, x_offset, y_offset, width, x_transform,
     '''
     color = options.get('color', 'black')
 
-    line = ET.SubElement(root_element, 'line')
+    axes_lines = ET.SubElement(root_element, 'g')
+    axes_lines.set('stroke', color)
+
+    axes_text = ET.SubElement(root_element, 'g')
+    axes_text.set('fill', color)
+
+    line = ET.SubElement(axes_lines, 'line')
     line.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
     line.set('x2', '%.2f' % (x_offset + width - AXIS_SIZE))
     line.set('y2', '%.2f' % (y_offset + AXIS_SIZE))
-    line.set('stroke', color)
 
     hide_tickmarks = options.get('hide_tickmarks', False)
 
@@ -199,34 +211,32 @@ def draw_bottom_axis(root_element, x_offset, y_offset, width, x_transform,
 
         for x, size in tickmarks:
             nx = x_transform(x)
-            tm = ET.SubElement(root_element, 'line')
+            tm = ET.SubElement(axes_lines, 'line')
             tm.set('x1', '%.2f' % (nx))
             tm.set('x2', '%.2f' % (nx))
             tm.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
             tm.set('y2', '%.2f' % (y_offset + AXIS_SIZE - size * 0.7))
-            tm.set('stroke', color)
 
             if hide_tickmarklabels:
                 continue
             if size != 10:
                 continue
 
-            ticklabel = ET.SubElement(root_element, 'text')
+            ticklabel = ET.SubElement(axes_text, 'text')
             ticklabel.set('font-size', str(FONT_SIZE))
             ticklabel.set('text-anchor', 'middle')
             ticklabel.set('y', '%.2f' % (y_offset + AXIS_SIZE +
                           TICKMARK_LABEL_SPACING + 0.5 * FONT_SIZE)),
             ticklabel.set('x', '%.2f' % nx)
-            ticklabel.set('fill', color)
             ticklabel.text = escape(str(x))
 
     hide_label = options.get('hide_label', False)
     label_link = options.get('label_link', None)
     if not hide_label:
         if label_link:
-            root_element = ET.SubElement(root_element, 'a')
-            root_element.set('xlink:href', label_link)
-        lbl = ET.SubElement(root_element, 'text')
+            axes_text = ET.SubElement(axes_text, 'a')
+            axes_text.set('xlink:href', label_link)
+        lbl = ET.SubElement(axes_text, 'text')
         lbl.set('font-size', str(FONT_SIZE))
         lbl.set('text-anchor', 'middle')
         lbl.set('y', '%.2f' %
@@ -234,12 +244,11 @@ def draw_bottom_axis(root_element, x_offset, y_offset, width, x_transform,
                  FONT_SIZE)),
         lbl.set('x', '%.2f' % (x_offset + 0.5 * width))
         label = options.get('label', 'X LABEL')
-        lbl.set('fill', color)
         lbl.text = escape(label)
 
 
 def draw_right_axis(root_element, x_offset, y_offset, height, y_transform,
-    interval, use_log, **options):
+                    interval, use_log, **options):
     '''
     Draw right axis.
 
@@ -247,12 +256,17 @@ def draw_right_axis(root_element, x_offset, y_offset, height, y_transform,
     '''
     color = options.get('color', 'black')
 
-    line = ET.SubElement(root_element, 'line')
+    axes_lines = ET.SubElement(root_element, 'g')
+    axes_lines.set('stroke', color)
+
+    axes_text = ET.SubElement(root_element, 'g')
+    axes_text.set('fill', color)
+
+    line = ET.SubElement(axes_lines, 'line')
     line.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
     line.set('x2', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y2', '%.2f' % (y_offset + height - AXIS_SIZE))
-    line.set('stroke', color)
 
     hide_tickmarks = options.get('hide_tickmarks', False)
 
@@ -262,19 +276,18 @@ def draw_right_axis(root_element, x_offset, y_offset, height, y_transform,
 
         for y, size in tickmarks:
             ny = y_transform(y)
-            tm = ET.SubElement(root_element, 'line')
+            tm = ET.SubElement(axes_lines, 'line')
             tm.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
             tm.set('x2', '%.2f' % (x_offset + AXIS_SIZE - size * 0.7))
             tm.set('y1', '%.2f' % (ny))
             tm.set('y2', '%.2f' % (ny))
-            tm.set('stroke', color)
 
             if hide_tickmarklabels:
                 continue
             if size != 10:
                 continue
 
-            ticklabel = ET.SubElement(root_element, 'text')
+            ticklabel = ET.SubElement(axes_text, 'text')
             ticklabel.set('font-size', str(FONT_SIZE))
             ticklabel.set('text-anchor', 'middle')
             ticklabel.set('x', '%.2f' % (x_offset + AXIS_SIZE +
@@ -283,16 +296,15 @@ def draw_right_axis(root_element, x_offset, y_offset, height, y_transform,
             ticklabel.set('transform', 'rotate(%d %.2f %.2f)' %
                 (-90, x_offset + AXIS_SIZE + TICKMARK_LABEL_SPACING +
                  0.5 * FONT_SIZE, ny))
-            ticklabel.set('fill', color)
             ticklabel.text = escape(str(y))
 
     hide_label = options.get('hide_label', False)
     label_link = options.get('label_link', None)
     if not hide_label:
         if label_link:
-            root_element = ET.SubElement(root_element, 'a')
-            root_element.set('xlink:href', label_link)
-        lbl = ET.SubElement(root_element, 'text')
+            axes_text = ET.SubElement(axes_text, 'a')
+            axes_text.set('xlink:href', label_link)
+        lbl = ET.SubElement(axes_text, 'text')
         lbl.set('font-size', str(FONT_SIZE))
         lbl.set('text-anchor', 'middle')
         lbl.set('x', '%.2f' %
@@ -303,5 +315,4 @@ def draw_right_axis(root_element, x_offset, y_offset, height, y_transform,
                 (-90, x_offset + AXIS_SIZE + TICKMARK_LABEL_SPACING +
                  2.5 * FONT_SIZE, y_offset + 0.5 * height))
         label = options.get('label', 'Y LABEL')
-        lbl.set('fill', color)
         lbl.text = escape(label)
