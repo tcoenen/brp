@@ -53,11 +53,11 @@ class ScatterPlotter(BasePlotter):
         self.gradient_i = kwargs.get('gradient_i', None)
         self.colors = kwargs.get('colors', [])
         if self.colors:
-            assert len(colors) == len(args[0])
+            assert len(self.colors) == len(args[0])
         self.color = kwargs.get('color', 'black')
         self.links = kwargs.get('links', [])
         if self.links:
-            assert len(links) == len(args[0])
+            assert len(self.links) == len(args[0])
         symbol_classes = kwargs.get('symbols', [])
         if not symbol_classes:
             symbol_classes = [kwargs.get('symbol', BaseSymbol)]
