@@ -17,9 +17,10 @@ LEGEND_FONT_SIZE = 12
 
 
 class LegendPlotter(BasePlotter):
-    def __init__(self, position=BOTTOMRIGHT):
+    def __init__(self, position=BOTTOMRIGHT, *args, **kwargs):
         self.entries = []
         self.position = position
+        self.draw_box = kwargs.get('drawbox', True)
 
     def add_entry(self, text, **kwargs):
         symbols = kwargs.get('symbols', [BaseSymbol])
@@ -40,10 +41,7 @@ class LegendPlotter(BasePlotter):
         legend_height = len(self.entries) * 18
         w = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
         legend_width = w / 2 - 20
-        legend = ET.SubElement(root_element, 'rect')
-        legend.set('stroke', 'black')
-        legend.set('fill', 'white')
-        legend.set('fill-opacity', '0.8')
+
         # Calculate the SVG coordinates of the top left point of the rectangle
         # that encloses the legend:
         if self.position == TOPLEFT:
@@ -61,12 +59,19 @@ class LegendPlotter(BasePlotter):
         elif self.position == UNDER_PLOT:
             x = self.svg_bbox[0] + AXIS_SIZE
             y = self.svg_bbox[3]
-            legend_width = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
+        legend_width = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
 
-        legend.set('x', '%.2f' % x)
-        legend.set('y', '%.2f' % y)
-        legend.set('width', '%.2f' % legend_width)
-        legend.set('height', '%.2f' % legend_height)
+        if self.draw_box:
+            legend = ET.SubElement(root_element, 'rect')
+            legend.set('stroke', 'black')
+            legend.set('fill', 'white')
+            legend.set('fill-opacity', '0.8')
+            
+
+            legend.set('x', '%.2f' % x)
+            legend.set('y', '%.2f' % y)
+            legend.set('width', '%.2f' % legend_width)
+            legend.set('height', '%.2f' % legend_height)
         # symbol + color + text
         for i, entry in enumerate(self.entries):
             symbols, text = entry
