@@ -15,6 +15,7 @@ UNDER_PLOT = 4
 
 LEGEND_FONT_SIZE = 12
 
+
 class LegendPlotter(BasePlotter):
     def __init__(self, position=BOTTOMRIGHT):
         self.entries = []
@@ -24,7 +25,7 @@ class LegendPlotter(BasePlotter):
         symbols = kwargs.get('symbols', [BaseSymbol])
         color = kwargs.get('color', 'black')
         linepattern = kwargs.get('linepattern', '')
-        symbol_kwargs = {'color' : color, 'linepattern' : linepattern}
+        symbol_kwargs = {'color': color, 'linepattern': linepattern}
         ls = []
         for symbol in symbols:
             s = symbol(**symbol_kwargs)
@@ -62,10 +63,10 @@ class LegendPlotter(BasePlotter):
             y = self.svg_bbox[3]
             legend_width = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
 
-        legend.set('x', '%.2f' % x) 
+        legend.set('x', '%.2f' % x)
         legend.set('y', '%.2f' % y)
         legend.set('width', '%.2f' % legend_width)
-        legend.set('height', '%.2f' % legend_height) 
+        legend.set('height', '%.2f' % legend_height)
         # symbol + color + text
         for i, entry in enumerate(self.entries):
             symbols, text = entry
@@ -77,9 +78,8 @@ class LegendPlotter(BasePlotter):
             for symbol in symbols:
                 symbol.draw_xy(root_element, sx, sy)
             t = ET.SubElement(root_element, 'text')
-            t.set('font-size', str(LEGEND_FONT_SIZE)) 
+            t.set('font-size', str(LEGEND_FONT_SIZE))
             t.set('x', '%.2f' % (sx + 20))
             t.set('y', '%.2f' % (sy + LEGEND_FONT_SIZE / 2 - 2))
             t.set('text-anchor', 'left')
-            t.text = escape(text) 
-
+            t.text = escape(text)
