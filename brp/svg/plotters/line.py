@@ -4,7 +4,6 @@ Implementation of LinePlots.
 from __future__ import division
 from brp.svg.et_import import ET
 
-from brp.svg.base import ET
 from brp.svg.plotters.scatter import ScatterPlotter
 
 
@@ -30,5 +29,5 @@ class LinePlotter(ScatterPlotter):
             pl.set('style', 'stroke-dasharray: %s' % self.line_pattern)
 
         if self.use_markers:
-            super(LinePlotter, self).draw(root_element, x_transform, y_transform)
-
+            super(LinePlotter, self).draw(root_element, x_transform,
+                  y_transform)
