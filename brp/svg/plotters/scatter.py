@@ -10,6 +10,7 @@ from brp.svg.plotters.symbol import BaseSymbol
 # Temporary imports to allow BaseSymbol2 to work
 from brp.svg.et_import import ET
 
+
 class FakeList(object):
     def __init__(self, something):
         self.payload = something
@@ -27,7 +28,7 @@ class FakeList(object):
 class ScatterPlotter(BasePlotter):
     '''
     Scatter plot, implements BasePlotter interface.
-    
+
     Note: this second iteration should allow scatter plots to be drawn that
     allow higher dimensionality than just 2 (whithout reimplementing the
     scatter plot part).
@@ -65,7 +66,8 @@ class ScatterPlotter(BasePlotter):
 
     def prepare_bbox(self, data_bbox):
         '''Update bounding box with the data for this scatter plot.'''
-        return find_bounding_box(self.datapoints[0], self.datapoints[1], data_bbox)
+        return find_bounding_box(self.datapoints[0], self.datapoints[1],
+                                 data_bbox)
 
     def draw(self, root_element, x_transform, y_transform):
         '''Draw scatter plot.'''
@@ -75,20 +77,19 @@ class ScatterPlotter(BasePlotter):
         else:
             L = FakeList('')
 
-        if self.gradient and self.gradient_i != None:
+        if self.gradient and self.gradient_i is not None:
             for i, datapoint in enumerate(izip(*self.datapoints)):
                 for s in self.symbols:
                     s.draw(root_element, x_transform, y_transform, *datapoint,
-                        color=self.gradient.get_css_color(datapoint[self.gradient_i]),
-                        link = L[i])
+                           color=self.gradient.get_css_color(
+                           datapoint[self.gradient_i]), link=L[i])
         elif self.colors:
             for i, datapoint in enumerate(izip(*self.datapoints)):
                 for s in self.symbols:
                     s.draw(root_element, x_transform, y_transform, *datapoint,
-                        color=self.colors[i], link = L[i])
+                           color=self.colors[i], link=L[i])
         else:
             for i, datapoint in enumerate(izip(*self.datapoints)):
                 for s in self.symbols:
                     s.draw(root_element, x_transform, y_transform, *datapoint,
-                        color=self.color, link = L[i])
-
+                           color=self.color, link=L[i])
