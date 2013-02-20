@@ -96,6 +96,10 @@ class PlotContainer(object):
               the generated SVG.
             * `data_padding` --- Integer, number of svg units (pixels) to use
               as padding around the plot inside of the axis.
+            * `x_min_range` --- tuple of floats (or integers) giving the
+              minimum range of the x axis (the horizontal axis)
+            * `y_min_range` --- tuple of floats (or integers) giving the
+              minimum range of the y axis (the vertical axis)
         '''
         self.update_svg_bbox(x_offset, y_offset, width, height)
         self.data_bbox = None
@@ -115,6 +119,8 @@ class PlotContainer(object):
                                         color=self.color)
 
         self.draw_axes = True
+        self.x_min_range = kwargs.get('x_min_range', None)
+        self.y_min_range = kwargs.get('y_min_range', None)
 
     def update_svg_bbox(self, x_offset, y_offset, width, height):
         '''
@@ -141,6 +147,17 @@ class PlotContainer(object):
         # Find the boundingbox that contains all data.
         for plotter in self.plot_layers:
             self.data_bbox = plotter.prepare_bbox(self.data_bbox)
+        # If required, set the range of the x and y axes to some minimum.
+        if self.x_min_range is not None:
+            tmp = list(self.data_bbox)
+            tmp[0] = min(tmp[0], self.x_min_range[0])
+            tmp[2] = max(tmp[2], self.x_min_range[1])
+            self.data_bbox = tuple(tmp)
+        if self.y_min_range is not None:
+            tmp = list(self.data_bbox)
+            tmp[1] = min(tmp[1], self.y_min_range[0])
+            tmp[3] = max(tmp[3], self.y_min_range[1])
+            self.data_bbox = tuple(tmp)
 
         # Add some white space around the plot.
         x_available = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
@@ -206,17 +223,14 @@ class PlotContainer(object):
             rect.set('fill', 'none')
 
     def set_minimum_data_bbox(self, bbox):
-        if self.data_bbox:
-            if bbox[0] < self.data_bbox[0]:
-                self.data_bbox[0] = bbox[0]
-            if bbox[1] < self.data_bbox[1]:
-                self.data_bbox[1] = bbox[1]
-            if bbox[2] > self.data_bbox[2]:
-                self.data_bbox[2] = bbox[2]
-            if bbox[3] > self.data_bbox[3]:
-                self.data_bbox[3] = bbox[3]
-        else:
-            self.data_bbox = bbox
+        self.set_minimum_x_range(bbox[0], bbox[2])
+        self.set_minimum_y_range(bbox[1], bbox[3])
+
+    def set_minimum_x_range(self, min_x, max_x):
+        self.x_min_range = (min_x, max_x)
+
+    def set_minimum_y_range(self, min_y, max_y):
+        self.y_min_range = (min_y, max_y)
 
     def hide_axes(self):
         self.draw_axes = False
