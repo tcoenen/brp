@@ -31,7 +31,7 @@ def bin_data(lx, n_bins, normed=False):
 
 def merge_bins(binned_data):
     out = []
-    last = binnned_data.pop()
+    last = binned_data.pop()
     while binned_data:
         current = binned_data.pop()
         if current[2] == last[2] and current[0] == last[1]:
