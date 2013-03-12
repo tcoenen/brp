@@ -4,11 +4,10 @@ Implementation of scatter plots.
 import copy
 from itertools import izip
 
+from brp.svg.et_import import ET
 from brp.svg.plotters.base import BasePlotter
 from brp.core.bbox import find_bounding_box
 from brp.svg.plotters.symbol import BaseSymbol
-# Temporary imports to allow BaseSymbol2 to work
-from brp.svg.et_import import ET
 
 
 class FakeList(object):
@@ -89,7 +88,10 @@ class ScatterPlotter(BasePlotter):
                     s.draw(root_element, x_transform, y_transform, *datapoint,
                            color=self.colors[i], link=L[i])
         else:
+            root_element = ET.SubElement(root_element, 'g')
+            root_element.set('stroke', self.color)
+            root_element.set('fill', self.color)
             for i, datapoint in enumerate(izip(*self.datapoints)):
                 for s in self.symbols:
                     s.draw(root_element, x_transform, y_transform, *datapoint,
-                           color=self.color, link=L[i])
+                           link=L[i])

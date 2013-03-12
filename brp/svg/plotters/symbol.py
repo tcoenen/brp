@@ -10,13 +10,11 @@ import math
 
 class BaseSymbol(object):
     def __init__(self, *args, **kwargs):
-        self.color = kwargs.get('color', 'black')
         self.size = kwargs.get('size', 2)
         self.size = kwargs.get('radius', 2)
         self.link = kwargs.get('link', '')
 
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
         link = kwargs.get('link', self.link)
 
         if link:
@@ -27,7 +25,9 @@ class BaseSymbol(object):
         p.set('cx', '%.2f' % x)
         p.set('cy', '%.2f' % y)
         p.set('r', '%.2f' % self.size)
-        p.set('fill', color)
+
+        if 'color' in kwargs:
+            p.set('fill', kwargs['color'])
 
     def draw(self, root_element, x_transform, y_transform, *datapoint,
              **kwargs):
@@ -50,7 +50,6 @@ class NoSymbol(BaseSymbol):
 
 class SquareSymbol(BaseSymbol):
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
         size = kwargs.get('size', self.size)
         link = kwargs.get('link', self.link)
 
@@ -63,16 +62,13 @@ class SquareSymbol(BaseSymbol):
         p.set('y', '%.2f' % (y - size))
         p.set('width', '%.2f' % (2 * size))
         p.set('height', '%.2f' % (2 * size))
-        p.set('fill', color)
+
+        if 'color' in kwargs:
+            p.set('fill', kwargs['color'])
 
 
 class VerticalErrorBarSymbol(BaseSymbol):
-    def __init__(self, *args, **kwargs):
-        self.color = kwargs.get('color', 'black')
-
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
-
         miny = kwargs.get('miny', y - 7)
         maxy = kwargs.get('maxy', y + 7)
 
@@ -81,7 +77,6 @@ class VerticalErrorBarSymbol(BaseSymbol):
         l1.set('x2', '%.2f' % x)
         l1.set('y1', '%.2f' % maxy)
         l1.set('y2', '%.2f' % miny)
-        l1.set('stroke', color)
 
         # Add 'serifs' to error bar.
         l2 = ET.SubElement(root_element, 'line')
@@ -89,14 +84,17 @@ class VerticalErrorBarSymbol(BaseSymbol):
         l2.set('x2', '%.2f' % (x + 3))
         l2.set('y1', '%.2f' % maxy)
         l2.set('y2', '%.2f' % maxy)
-        l2.set('stroke', color)
 
         l3 = ET.SubElement(root_element, 'line')
         l3.set('x1', '%.2f' % (x - 3))
         l3.set('x2', '%.2f' % (x + 3))
         l3.set('y1', '%.2f' % miny)
         l3.set('y2', '%.2f' % miny)
-        l3.set('stroke', color)
+
+        if 'color' in kwargs:
+            l1.set('stroke', kwargs['color'])
+            l2.set('stroke', kwargs['color'])
+            l3.set('stroke', kwargs['color'])
 
     def draw(self, root_element, x_transform, y_transform, *datapoint,
              **kwargs):
@@ -114,12 +112,7 @@ class VerticalErrorBarSymbol(BaseSymbol):
 
 
 class HorizontalErrorBarSymbol(BaseSymbol):
-    def __init__(self, *args, **kwargs):
-        self.color = kwargs.get('color', 'black')
-
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
-
         minx = kwargs.get('minx', x - 7)
         maxx = kwargs.get('maxx', x + 7)
 
@@ -128,7 +121,6 @@ class HorizontalErrorBarSymbol(BaseSymbol):
         l1.set('x2', '%.2f' % minx)
         l1.set('y1', '%.2f' % y)
         l1.set('y2', '%.2f' % y)
-        l1.set('stroke', color)
 
         # Add 'serifs' to error bar.
         l2 = ET.SubElement(root_element, 'line')
@@ -136,14 +128,17 @@ class HorizontalErrorBarSymbol(BaseSymbol):
         l2.set('x2', '%.2f' % maxx)
         l2.set('y1', '%.2f' % (y - 3))
         l2.set('y2', '%.2f' % (y + 3))
-        l2.set('stroke', color)
 
         l3 = ET.SubElement(root_element, 'line')
         l3.set('x1', '%.2f' % minx)
         l3.set('x2', '%.2f' % minx)
         l3.set('y1', '%.2f' % (y + 3))
         l3.set('y2', '%.2f' % (y - 3))
-        l3.set('stroke', color)
+
+        if 'color' in kwargs:
+            l1.set('stroke', kwargs['color'])
+            l2.set('stroke', kwargs['color'])
+            l3.set('stroke', kwargs['color'])
 
     def draw(self, root_element, x_transform, y_transform, *datapoint,
              **kwargs):
@@ -162,20 +157,19 @@ class HorizontalErrorBarSymbol(BaseSymbol):
 
 class LineSymbol(BaseSymbol):
     def __init__(self, *args, **kwargs):
-        self.color = kwargs.get('color', 'black')
         self.line_pattern = kwargs.get('linepattern', '')
 
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
         l = ET.SubElement(root_element, 'line')
         l.set('x1', '%.2f' % (x - 15))
         l.set('x2', '%.2f' % (x + 15))
         l.set('y1', '%.2f' % y)
         l.set('y2', '%.2f' % y)
-        l.set('stroke', color)
         if self.line_pattern:
             l.set('style', 'stroke-dasharray:%s' % (self.line_pattern))
 
+        if 'color' in kwargs:
+            l.set('stroke', kwargs['color'])
 
 class RADECSymbol(BaseSymbol):
     '''
@@ -192,7 +186,6 @@ class RADECSymbol(BaseSymbol):
         ra = datapoint[2]
         dec = datapoint[3]
 
-        color = kwargs.get('color', self.color)
         link = kwargs.get('link', '')
 
         DEC_SIZE = 7
@@ -213,7 +206,6 @@ class RADECSymbol(BaseSymbol):
         h1.set('y1', '%.2f' % y)
         h1.set('x2', '%.2f' % (x + dec_pointer_dx))
         h1.set('y2', '%.2f' % (y + dec_pointer_dy))
-        h1.set('stroke', color)
         h1.set('stroke-width', '3')
 
         h2 = ET.SubElement(root_element, 'line')
@@ -221,7 +213,10 @@ class RADECSymbol(BaseSymbol):
         h2.set('y1', '%.2f' % y)
         h2.set('x2', '%.2f' % (x + ra_pointer_dx))
         h2.set('y2', '%.2f' % (y + ra_pointer_dy))
-        h2.set('stroke', color)
+
+        if 'color' in kwargs:
+            h1.set('stroke', kwargs['color'])
+            h2.set('stroke', kwargs['color'])
 
 
 class CrossHairSymbol(BaseSymbol):
@@ -238,6 +233,8 @@ class CrossHairSymbol(BaseSymbol):
         d.set('y', '%.2f' % (y - h))
         d.set('width', '%.2f' % W)
         d.set('height', '%.2f' % H)
-        d.set('stroke', self.color)
         d.set('fill', 'none')
         d.set('stroke-width', '2')
+
+        if 'color' in kwargs:
+            d.set('stroke', kwargs['color'])

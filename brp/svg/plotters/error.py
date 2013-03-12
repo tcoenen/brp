@@ -2,6 +2,7 @@ from __future__ import division
 
 from itertools import izip
 
+from brp.svg.et_import import ET
 from brp.svg.plotters.scatter import ScatterPlotter, FakeList
 from brp.svg.plotters.symbol import HorizontalErrorBarSymbol
 from brp.svg.plotters.symbol import VerticalErrorBarSymbol
@@ -59,8 +60,10 @@ class ErrorPlotter(ScatterPlotter):
                            color=color, link=L[i], err_x=self.err_x[i],
                            err_y=self.err_y[i])
         else:
+            root_element = ET.SubElement(root_element, 'g')
+            root_element.set('stroke', self.color)
+            root_element.set('fill', self.color)
             for i, datapoint in enumerate(izip(*self.datapoints)):
                 for s in self.symbols:
                     s.draw(root_element, x_transform, y_transform, *datapoint,
-                           color=self.color, link=L[i], err_x=self.err_x[i],
-                           err_y=self.err_y[i])
+                           link=L[i], err_x=self.err_x[i], err_y=self.err_y[i])
