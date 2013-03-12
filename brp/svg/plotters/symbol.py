@@ -1,9 +1,12 @@
+'''
+Implementation of the various symbols that show up in scatter and line plots.
+'''
 from __future__ import division
-from xml.sax.saxutils import escape
+#from xml.sax.saxutils import escape
 
 from brp.svg.et_import import ET
 import math
-import sys
+
 
 class BaseSymbol(object):
     def __init__(self, *args, **kwargs):
@@ -24,9 +27,10 @@ class BaseSymbol(object):
         p.set('cx', '%.2f' % x)
         p.set('cy', '%.2f' % y)
         p.set('r', '%.2f' % self.size)
-        p.set('fill', color) 
+        p.set('fill', color)
 
-    def draw(self, root_element, x_transform, y_transform, *datapoint, **kwargs): 
+    def draw(self, root_element, x_transform, y_transform, *datapoint,
+             **kwargs):
         nx = x_transform(datapoint[0])
         ny = y_transform(datapoint[1])
         self.draw_xy(root_element, nx, ny, *datapoint, **kwargs)
@@ -35,16 +39,18 @@ class BaseSymbol(object):
 class NoSymbol(BaseSymbol):
     def __init__(self, *args, **kwargs):
         pass
+
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
         pass
-    def draw(self, root_element, x_transform, y_transform, *datapoint, **kwargs):
+
+    def draw(self, root_element, x_transform, y_transform, *datapoint,
+             **kwargs):
         pass
 
 
 class SquareSymbol(BaseSymbol):
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
         color = kwargs.get('color', self.color)
-        hover_text = kwargs.get('hover_text', '')
         size = kwargs.get('size', self.size)
         link = kwargs.get('link', self.link)
 
@@ -57,71 +63,54 @@ class SquareSymbol(BaseSymbol):
         p.set('y', '%.2f' % (y - size))
         p.set('width', '%.2f' % (2 * size))
         p.set('height', '%.2f' % (2 * size))
-        p.set('fill', color) 
+        p.set('fill', color)
 
 
-# All the Error*Symbol classes need a little refactor.
-# The way I use draw_xy does not match the rest of the symbols.
 class VerticalErrorBarSymbol(BaseSymbol):
     def __init__(self, *args, **kwargs):
         self.color = kwargs.get('color', 'black')
 
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
-        # TODO : add 'serifs'
         color = kwargs.get('color', self.color)
+
+        miny = kwargs.get('miny', y - 7)
+        maxy = kwargs.get('maxy', y + 7)
+
         l1 = ET.SubElement(root_element, 'line')
         l1.set('x1', '%.2f' % x)
         l1.set('x2', '%.2f' % x)
-        l1.set('y1', '%.2f' % (y + 7))
-        l1.set('y2', '%.2f' % (y - 7))
+        l1.set('y1', '%.2f' % maxy)
+        l1.set('y2', '%.2f' % miny)
         l1.set('stroke', color)
 
+        # Add 'serifs' to error bar.
         l2 = ET.SubElement(root_element, 'line')
         l2.set('x1', '%.2f' % (x - 3))
         l2.set('x2', '%.2f' % (x + 3))
-        l2.set('y1', '%.2f' % (y + 7))
-        l2.set('y2', '%.2f' % (y + 7))
+        l2.set('y1', '%.2f' % maxy)
+        l2.set('y2', '%.2f' % maxy)
         l2.set('stroke', color)
 
         l3 = ET.SubElement(root_element, 'line')
         l3.set('x1', '%.2f' % (x - 3))
         l3.set('x2', '%.2f' % (x + 3))
-        l3.set('y1', '%.2f' % (y - 7))
-        l3.set('y2', '%.2f' % (y - 7))
+        l3.set('y1', '%.2f' % miny)
+        l3.set('y2', '%.2f' % miny)
         l3.set('stroke', color)
 
-    def draw(self, root_element, x_transform, y_transform, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
-        x = datapoint[0]
-        y = datapoint[1]
-        err_y = kwargs.get('err_y', [])
-        tx = x_transform(x)
-        ty = y_transform(y)
+    def draw(self, root_element, x_transform, y_transform, *datapoint,
+             **kwargs):
 
-        if err_y:
-            my = y - err_y[0]
-            My = y + err_y[1]
-            tmy = y_transform(my)
-            tMy = y_transform(My)
-            l1 = ET.SubElement(root_element, 'line')
-            l1.set('x1', '%.2f' % tx)
-            l1.set('x2', '%.2f' % tx)
-            l1.set('y1', '%.2f' % tmy)
-            l1.set('y2', '%.2f' % tMy)
-            l1.set('stroke', color)
-            # TODO : add 'serifs'
-            l2 = ET.SubElement(root_element, 'line')
-            l2.set('x1', '%.2f' % (tx - 3))
-            l2.set('x2', '%.2f' % (tx + 3))
-            l2.set('y1', '%.2f' % tmy)
-            l2.set('y2', '%.2f' % tmy)
-            l2.set('stroke', color)
-            l3 = ET.SubElement(root_element, 'line')
-            l3.set('x1', '%.2f' % (tx - 3))
-            l3.set('x2', '%.2f' % (tx + 3))
-            l3.set('y1', '%.2f' % tMy)
-            l3.set('y2', '%.2f' % tMy)
-            l3.set('stroke', color)
+        tx = x_transform(datapoint[0])
+        ty = y_transform(datapoint[1])
+        # Should not be called without error.
+        err_y = kwargs['err_y']
+        # Assumes the general case of assymetric error bars.
+        tmy = y_transform(datapoint[1] - err_y[0])
+        tMy = y_transform(datapoint[1] + err_y[1])
+
+        self.draw_xy(root_element, tx, ty, *datapoint, miny=tmy, maxy=tMy,
+                     **kwargs)
 
 
 class HorizontalErrorBarSymbol(BaseSymbol):
@@ -130,62 +119,46 @@ class HorizontalErrorBarSymbol(BaseSymbol):
 
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
         color = kwargs.get('color', self.color)
-        # TODO : add 'serifs'
+
+        minx = kwargs.get('minx', x - 7)
+        maxx = kwargs.get('maxx', x + 7)
+
         l1 = ET.SubElement(root_element, 'line')
-        l1.set('x1', '%.2f' % (x + 7))
-        l1.set('x2', '%.2f' % (x - 7))
+        l1.set('x1', '%.2f' % maxx)
+        l1.set('x2', '%.2f' % minx)
         l1.set('y1', '%.2f' % y)
         l1.set('y2', '%.2f' % y)
         l1.set('stroke', color)
 
+        # Add 'serifs' to error bar.
         l2 = ET.SubElement(root_element, 'line')
-        l2.set('x1', '%.2f' % (x + 7))
-        l2.set('x2', '%.2f' % (x + 7))
+        l2.set('x1', '%.2f' % maxx)
+        l2.set('x2', '%.2f' % maxx)
         l2.set('y1', '%.2f' % (y - 3))
         l2.set('y2', '%.2f' % (y + 3))
         l2.set('stroke', color)
 
         l3 = ET.SubElement(root_element, 'line')
-        l3.set('x1', '%.2f' % (x - 7))
-        l3.set('x2', '%.2f' % (x - 7))
+        l3.set('x1', '%.2f' % minx)
+        l3.set('x2', '%.2f' % minx)
         l3.set('y1', '%.2f' % (y + 3))
         l3.set('y2', '%.2f' % (y - 3))
         l3.set('stroke', color)
 
-    def draw(self, root_element, x_transform, y_transform, *datapoint, **kwargs):
-        color = kwargs.get('color', self.color)
-        x = datapoint[0]
-        y = datapoint[1]
+    def draw(self, root_element, x_transform, y_transform, *datapoint,
+             **kwargs):
 
-        err_x = kwargs.get('err_x', [])
-        tx = x_transform(x)
-        ty = y_transform(y)
+        tx = x_transform(datapoint[0])
+        ty = y_transform(datapoint[1])
+        # Should not be called without error.
+        err_x = kwargs['err_x']
+        # Assumes the general case of assymetric error bars.
+        tmx = x_transform(datapoint[0] - err_x[0])
+        tMx = x_transform(datapoint[0] + err_x[1])
 
-        if err_x: # assume the general case of asymmetric errors
-            mx = x - err_x[0]
-            Mx = x + err_x[1]
-            tmx = x_transform(mx)
-            tMx = x_transform(Mx)
-            l1 = ET.SubElement(root_element, 'line')
-            l1.set('x1', '%.2f' % tmx)
-            l1.set('x2', '%.2f' % tMx)
-            l1.set('y1', '%.2f' % ty)
-            l1.set('y2', '%.2f' % ty)
-            l1.set('stroke', color)
-            # TODO : add 'serifs'
-            l2 = ET.SubElement(root_element, 'line')
-            l2.set('x1', '%.2f' % tmx)
-            l2.set('x2', '%.2f' % tmx)
-            l2.set('y1', '%.2f' % (ty - 3))
-            l2.set('y2', '%.2f' % (ty + 3))
-            l2.set('stroke', color)
-            l3 = ET.SubElement(root_element, 'line')
-            l3.set('x1', '%.2f' % tMx)
-            l3.set('x2', '%.2f' % tMx)
-            l3.set('y1', '%.2f' % (ty - 3))
-            l3.set('y2', '%.2f' % (ty + 3))
-            l3.set('stroke', color)
-          
+        self.draw_xy(root_element, tx, ty, *datapoint, minx=tmx, maxx=tMx,
+                     **kwargs)
+
 
 class LineSymbol(BaseSymbol):
     def __init__(self, *args, **kwargs):
@@ -250,54 +223,15 @@ class RADECSymbol(BaseSymbol):
         h2.set('y2', '%.2f' % (y + ra_pointer_dy))
         h2.set('stroke', color)
 
+
 class CrossHairSymbol(BaseSymbol):
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
         # only draw if the self.x and self.y lie within the data_bbox
 
-#        l1 = ET.SubElement(root_element, 'line')
-#        l1.set('x1', '%.2f' % x_transform(self.x))
-#        l1.set('y1', '%.2f' % (y_transform(self.y) - 0.7 * rh))
-#        l1.set('x2', '%.2f' % x_transform(self.x))
-#        l1.set('y2', '%.2f' % (y_transform(self.y) - 0.3 * rh))
-#        l1.set('stroke', self.color)
-#        l1.set('stroke-width', '2')
-#
-#        l1 = ET.SubElement(root_element, 'line')
-#        l1.set('x1', '%.2f' % x_transform(self.x))
-#        l1.set('y1', '%.2f' % (y_transform(self.y) + 0.3 * rh))
-#        l1.set('x2', '%.2f' % x_transform(self.x))
-#        l1.set('y2', '%.2f' % (y_transform(self.y) + 0.7 * rh))
-#        l1.set('stroke', self.color)
-#        l1.set('stroke-width', '2')
-#        
-#        l2 = ET.SubElement(root_element, 'line')
-#        l2.set('x1', '%.2f' % (x_transform(self.x) - 0.7 * rw))
-#        l2.set('y1', '%.2f' % y_transform(self.y))
-#        l2.set('x2', '%.2f' % (x_transform(self.x) - 0.3 * rw))
-#        l2.set('y2', '%.2f' % y_transform(self.y))
-#        l2.set('stroke', self.color)
-#        l2.set('stroke-width', '2')
-#
-#        l2 = ET.SubElement(root_element, 'line')
-#        l2.set('x1', '%.2f' % (x_transform(self.x) + 0.3 * rw))
-#        l2.set('y1', '%.2f' % y_transform(self.y))
-#        l2.set('x2', '%.2f' % (x_transform(self.x) + 0.7 * rw))
-#        l2.set('y2', '%.2f' % y_transform(self.y))
-#        l2.set('stroke', self.color)
-#        l2.set('stroke-width', '2')
-        
-#        d = ET.SubElement(root_element, 'rect')
-#        d.set('x', '%.2f' % (x_transform(self.x) - 0.5 * rw))
-#        d.set('y', '%.2f' % (y_transform(self.y) - 0.5 * rh))
-#        d.set('width', '%.2f' % rw)
-#        d.set('height', '%.2f' % rh)
-#        d.set('stroke', self.color)
-#        d.set('fill', 'none')
-#        d.set('stroke-width', '2')
         W = 10
-        w = W/2
+        w = W / 2
         H = 10
-        h = H/2
+        h = H / 2
 
         d = ET.SubElement(root_element, 'rect')
         d.set('x', '%.2f' % (x - w))
@@ -307,4 +241,3 @@ class CrossHairSymbol(BaseSymbol):
         d.set('stroke', self.color)
         d.set('fill', 'none')
         d.set('stroke-width', '2')
-
