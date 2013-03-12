@@ -24,14 +24,14 @@ class LegendPlotter(BasePlotter):
 
     def add_entry(self, text, **kwargs):
         symbols = kwargs.get('symbols', [BaseSymbol])
-        color = kwargs.get('color', 'black')
         linepattern = kwargs.get('linepattern', '')
-        symbol_kwargs = {'color': color, 'linepattern': linepattern}
+        symbol_kwargs = {'linepattern': linepattern}
         ls = []
         for symbol in symbols:
             s = symbol(**symbol_kwargs)
             ls.append(s)
-        self.entries.append((ls, text))
+        color = kwargs.get('color', 'black')
+        self.entries.append((ls, text, color))
 
     def done_bbox(self, data_bbox, svg_bbox):
         self.svg_bbox = copy.copy(svg_bbox)
@@ -74,14 +74,14 @@ class LegendPlotter(BasePlotter):
             legend.set('height', '%.2f' % legend_height)
         # symbol + color + text
         for i, entry in enumerate(self.entries):
-            symbols, text = entry
+            symbols, text, color = entry
             # Some of the code below assumes that the font-size for entries in
             # the Legends is 18 (I futzed around a bit to find the off-sets
             # that look good).
             sx = x + 20
             sy = y + 9 + i * 18
             for symbol in symbols:
-                symbol.draw_xy(root_element, sx, sy)
+                symbol.draw_xy(root_element, sx, sy, color=color)
             t = ET.SubElement(root_element, 'text')
             t.set('font-size', str(LEGEND_FONT_SIZE))
             t.set('x', '%.2f' % (sx + 20))
