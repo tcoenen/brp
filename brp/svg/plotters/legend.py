@@ -59,7 +59,7 @@ class LegendPlotter(BasePlotter):
         elif self.position == UNDER_PLOT:
             x = self.svg_bbox[0] + AXIS_SIZE
             y = self.svg_bbox[3]
-        legend_width = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
+            legend_width = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
 
         if self.draw_box:
             legend = ET.SubElement(root_element, 'rect')
