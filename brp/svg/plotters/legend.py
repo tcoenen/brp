@@ -66,8 +66,6 @@ class LegendPlotter(BasePlotter):
             legend.set('stroke', 'black')
             legend.set('fill', 'white')
             legend.set('fill-opacity', '0.8')
-            
-
             legend.set('x', '%.2f' % x)
             legend.set('y', '%.2f' % y)
             legend.set('width', '%.2f' % legend_width)

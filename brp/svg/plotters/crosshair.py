@@ -19,7 +19,7 @@ class CrossHairPlotter(BasePlotter):
     def draw(self, root_element, x_transform, y_transform):
         # only draw if the self.x and self.y lie within the data_bbox
         if (self.data_bbox[0] <= self.x <= self.data_bbox[2]) and \
-            (self.data_bbox[1] <= self.y <= self.data_bbox[3]):
+                (self.data_bbox[1] <= self.y <= self.data_bbox[3]):
 
             rw = 0.1 * (self.svg_bbox[2] - self.svg_bbox[0])
             rh = 0.1 * (self.svg_bbox[3] - self.svg_bbox[1])

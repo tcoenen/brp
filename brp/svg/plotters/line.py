@@ -30,4 +30,4 @@ class LinePlotter(ScatterPlotter):
 
         if self.use_markers:
             super(LinePlotter, self).draw(root_element, x_transform,
-                  y_transform)
+                                          y_transform)

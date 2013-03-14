@@ -3,23 +3,16 @@ Implementation of scatter plots.
 '''
 import copy
 from itertools import izip
-
 import StringIO
 from base64 import encodestring
+
 from PIL import Image, ImageDraw
-
-import brp.svg.colornames
-from brp.svg.colornames import svg_color2rgba_color
-
-
 
 from brp.svg.et_import import ET
 from brp.svg.plotters.base import BasePlotter
 from brp.core.bbox import find_bounding_box
 from brp.svg.plotters.symbol import BaseSymbol
-
-# DEBUGGING:
-import sys
+from brp.svg.colornames import svg_color2rgba_color
 
 
 class FakeList(object):

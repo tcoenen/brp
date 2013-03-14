@@ -83,8 +83,8 @@ class LeftAxisPlotter(BasePlotter, AxisPlotterMixin):
 
     def draw(self, root_element, x_transform, y_transform):
         '''Draw left axis.'''
-        # This is a bit of a hack, to be able to define a different interval for
-        # this axis.
+        # This is a bit of a hack, to be able to define a different interval
+        # for this axis.
         if self.kwargs.has_key('s_interval') and self.kwargs.has_key('s_log'):
             log = self.kwargs['s_log']
             interval = self.kwargs['s_interval']
@@ -116,7 +116,7 @@ class RightAxisPlotter(BasePlotter, AxisPlotterMixin):
     def draw(self, root_element, x_transform, y_transform):
         # This is a bit of a hack, to be able to define a different interval
         # for this axis.
-        if self.kwargs.has_key('s_interval') and self.kwargs.has_key('s_log'):
+        if 's_interval' in self.kwargs and 's_log' in self.kwargs:
             log = self.kwargs['s_log']
             interval = self.kwargs['s_interval']
             y_transform = setup_transform_1d(interval, (self.y_offset +
@@ -147,7 +147,7 @@ class TopAxisPlotter(BasePlotter, AxisPlotterMixin):
     def draw(self, root_element, x_transform, y_transform):
         # This is a bit of a hack, to be able to define a different interval
         # for this axis.
-        if self.kwargs.has_key('s_interval') and self.kwargs.has_key('s_log'):
+        if 's_interval' in self.kwargs and 's_log' in self.kwargs:
             log = self.kwargs['s_log']
             interval = self.kwargs['s_interval']
             x_transform = setup_transform_1d(interval, (self.x_offset +
@@ -178,7 +178,7 @@ class BottomAxisPlotter(BasePlotter, AxisPlotterMixin):
     def draw(self, root_element, x_transform, y_transform):
         # This is a bit of a hack, to be able to define a different interval
         # for this axis.
-        if self.kwargs.has_key('s_interval') and self.kwargs.has_key('s_log'):
+        if 's_interval' in self.kwargs and 's_log' in self.kwargs:
             log = self.kwargs['s_log']
             interval = self.kwargs['s_interval']
             x_transform = setup_transform_1d(interval, (self.x_offset +

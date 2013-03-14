@@ -60,7 +60,6 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
     axes_text = ET.SubElement(root_element, 'g')
     axes_text.set('fill', color)
 
-
     line = ET.SubElement(axes_lines, 'line')
     line.set('x1', '%.2f' % (x_offset + AXIS_SIZE))
     line.set('y1', '%.2f' % (y_offset + AXIS_SIZE))
@@ -94,7 +93,8 @@ def draw_left_axis(root_element, x_offset, y_offset, height, y_transform,
                           TICKMARK_LABEL_SPACING)),
             ticklabel.set('y', '%.2f' % ny)
             ticklabel.set('transform', 'rotate(%d %.2f %.2f)' %
-                (-90, x_offset + AXIS_SIZE - TICKMARK_LABEL_SPACING, ny))
+                          (-90, x_offset + AXIS_SIZE - TICKMARK_LABEL_SPACING,
+                          ny))
             ticklabel.text = escape(str(y))
 
     hide_label = options.get('hide_label', False)
@@ -294,8 +294,8 @@ def draw_right_axis(root_element, x_offset, y_offset, height, y_transform,
                           TICKMARK_LABEL_SPACING + 0.5 * FONT_SIZE)),
             ticklabel.set('y', '%.2f' % ny)
             ticklabel.set('transform', 'rotate(%d %.2f %.2f)' %
-                (-90, x_offset + AXIS_SIZE + TICKMARK_LABEL_SPACING +
-                 0.5 * FONT_SIZE, ny))
+                          (-90, x_offset + AXIS_SIZE + TICKMARK_LABEL_SPACING +
+                          0.5 * FONT_SIZE, ny))
             ticklabel.text = escape(str(y))
 
     hide_label = options.get('hide_label', False)

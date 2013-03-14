@@ -7,7 +7,7 @@ from brp.svg.plotters.base import BasePlotter
 def bin_data(lx, n_bins, normed=False):
     '''
     Bin histogram data.
-    
+
     Note: Binned data is [(x_min1, x_max1, val1), ..., (x_min2, x_max2, val2)]
     '''
     m = min(lx)
@@ -29,6 +29,7 @@ def bin_data(lx, n_bins, normed=False):
     return [(bin_edges[i], bin_edges[i+1], bin_values[i]) \
         for i in range(n_bins)]
 
+
 def merge_bins(binned_data):
     out = []
     last = binned_data.pop()
@@ -40,6 +41,7 @@ def merge_bins(binned_data):
             out.append(last)
             last = current
     return out
+
 
 def make_y_log_safe(binned_data):
     return [x for x in binned_data if x[2] > 0]
@@ -59,7 +61,7 @@ class HistogramPlotter(BasePlotter):
         self.line_pattern = kwargs.get('linepattern', '')
 
     def prepare_bbox(self, data_bbox):
-        x_min = self.binned_data[0][0] 
+        x_min = self.binned_data[0][0]
         x_max = self.binned_data[-1][1]
         if self.data_range:
             y_min = min((x[2] for x in self.binned_data))
@@ -76,17 +78,21 @@ class HistogramPlotter(BasePlotter):
             return [x_min, y_min, x_max, y_max]
         else:
             data_bbox = list(data_bbox)
-        
-        if x_min < data_bbox[0]: data_bbox[0] = x_min  
-        if x_max > data_bbox[2]: data_bbox[2] = x_max
-        if y_min < data_bbox[1]: data_bbox[1] = y_min
-        if y_max > data_bbox[3]: data_bbox[3] = y_max
-        
+
+        if x_min < data_bbox[0]:
+            data_bbox[0] = x_min
+        if x_max > data_bbox[2]:
+            data_bbox[2] = x_max
+        if y_min < data_bbox[1]:
+            data_bbox[1] = y_min
+        if y_max > data_bbox[3]:
+            data_bbox[3] = y_max
+
         return tuple(data_bbox)
 
     def draw(self, root_element, x_transform, y_transform):
         L = len(self.binned_data)
-        # Still needs the optimization for line segments that extend each other 
+        # Still needs the optimization for line segments that extend each other
         # (those need to be merged).
         points = []
         for i in range(L):
@@ -98,27 +104,27 @@ class HistogramPlotter(BasePlotter):
                     points.append('%.2f,%.2f' % (x_transform(y), y_transform(x1)))
             else:
                 x1, x2, y = self.binned_data[i]
-                previous_x1, previous_x2, previous_y = self.binned_data[i-1]
+                previous_x1, previous_x2, previous_y = self.binned_data[i - 1]
                 if x1 == previous_x2:
                     if self.orientation == 'horizontal':
-                        points.append('%.2f,%.2f' % (x_transform(x1), 
-                            y_transform(previous_y)))
+                        points.append('%.2f,%.2f' % (x_transform(x1),
+                                      y_transform(previous_y)))
                         if y != previous_y:
-                            points.append('%.2f,%.2f' % (x_transform(x1), 
-                                y_transform(y)))
-                    else:
-                        points.append('%.2f,%.2f' % (x_transform(previous_y), 
-                            y_transform(x1)))
-                        if y != previous_y:
-                            points.append('%.2f,%.2f' % (x_transform(y), 
-                                y_transform(x1)))
-                else: # a 'break' in the histogram
-                    if self.orientation == 'horizontal':
-                        points.append('%.2f,%.2f' % (x_transform(previous_x2),
-                            y_transform(previous_y)))
+                            points.append('%.2f,%.2f' % (x_transform(x1),
+                                          y_transform(y)))
                     else:
                         points.append('%.2f,%.2f' % (x_transform(previous_y),
-                            y_transform(previous_x2)))
+                                                     y_transform(x1)))
+                        if y != previous_y:
+                            points.append('%.2f,%.2f' % (x_transform(y),
+                                          y_transform(x1)))
+                else:  # a 'break' in the histogram
+                    if self.orientation == 'horizontal':
+                        points.append('%.2f,%.2f' % (x_transform(previous_x2),
+                                      y_transform(previous_y)))
+                    else:
+                        points.append('%.2f,%.2f' % (x_transform(previous_y),
+                                      y_transform(previous_x2)))
                     pl = ET.SubElement(root_element, 'polyline')
                     pl.set('stroke', self.color)
                     pl.set('fill', 'none')
@@ -141,4 +147,3 @@ class HistogramPlotter(BasePlotter):
                 pl.set('points', ' '.join(points))
                 if self.line_pattern:
                     pl.set('style', 'stroke-dasharray:%s' % self.line_pattern)
-
