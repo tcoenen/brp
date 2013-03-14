@@ -11,6 +11,7 @@ from brp.svg.plotters.axes import RightAxisPlotter
 
 from brp.core.bbox import stretch_bbox
 from brp.core.transform import setup_transforms
+from brp.core.exceptions import NotImplementedError
 
 from brp.svg.et_import import ET
 from brp.svg.constants import AXIS_SIZE, FONT_SIZE, DATA_PADDING
@@ -122,6 +123,8 @@ class PlotContainer(object):
         self.x_min_range = kwargs.get('x_min_range', None)
         self.y_min_range = kwargs.get('y_min_range', None)
 
+        self.raster_fallback = kwargs.get('raster', False)
+
     def update_svg_bbox(self, x_offset, y_offset, width, height):
         '''
         Update boundingbox for SVG drawing.
@@ -129,23 +132,23 @@ class PlotContainer(object):
         self.svg_bbox = [x_offset, y_offset, x_offset + width,
                          y_offset + height]
 
-    def add_plotter(self, plotter):
+    def add_plotter(self, plotter, raster=False):
         '''
         Add a BasePlotter sub-class instance to this PlotContainer.
         '''
-        self.plot_layers.append(plotter)
+        self.plot_layers.append((plotter, raster))
 
     def draw(self, root_element):
         '''Draw this PlotContainer.'''
         # Add the *AxisPlotter to the plot_layers
         if self.draw_axes:
-            self.plot_layers.append(self.top)
-            self.plot_layers.append(self.right)
-            self.plot_layers.append(self.left)
-            self.plot_layers.append(self.bottom)
+            self.plot_layers.append((self.top, False))
+            self.plot_layers.append((self.right, False))
+            self.plot_layers.append((self.left, False))
+            self.plot_layers.append((self.bottom, False))
 
         # Find the boundingbox that contains all data.
-        for plotter in self.plot_layers:
+        for plotter, use_raster_fallback in self.plot_layers:
             self.data_bbox = plotter.prepare_bbox(self.data_bbox)
         # If required, set the range of the x and y axes to some minimum.
         if self.x_min_range is not None:
@@ -175,7 +178,7 @@ class PlotContainer(object):
 
         # Comunicate to each *Plotter object the data bounding box and the
         # SVG plot bounding box.
-        for plotter in self.plot_layers:
+        for plotter, use_raster_fallback in self.plot_layers:
             plotter.done_bbox(self.data_bbox, self.svg_bbox)
 
         # Check that all the required to construct the transforms is available
@@ -203,8 +206,26 @@ class PlotContainer(object):
                           height='%.2f' % (svg_y_max - svg_y_min))
 
         # Draw all the parts of the plot.
-        for p_layer in self.plot_layers:
-            p_layer.draw(root_element, xtr, ytr)
+        for p_layer, use_raster_fallback in self.plot_layers:
+            if use_raster_fallback:
+                # find appropriate transforms, i.e. starting at (0, 0)
+                # going to width, height
+                # XXX TODO: check for off-by-ones!!!!
+                img_width = svg_target_bbox[2] - svg_target_bbox[0]
+                img_height = abs(svg_target_bbox[3] - svg_target_bbox[1])
+                assert img_width > 0
+                assert img_height > 0
+                img_bbox = [0, img_height, img_width, 0]
+                # Add explicit check for logarithmic axes, if present
+                # blow up for now. (maybe?)
+                xtr2, ytr2 = setup_transforms(self.data_bbox, img_bbox,
+                                              x_log=False, y_log=False)
+                try:
+                    p_layer.rdraw(root_element, xtr2, ytr2, svg_target_bbox)
+                except NotImplementedError:
+                    p_layer.draw(root_element, xtr, ytr)
+            else:
+                p_layer.draw(root_element, xtr, ytr)
 
         # Remove the *AxisPlotters from the parts of the plot again.
         if self.draw_axes:

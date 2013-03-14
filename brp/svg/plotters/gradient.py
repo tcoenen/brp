@@ -43,6 +43,10 @@ class RGBGradient(object):
         red, green, blue = self.get_color(value)
         return '#%02x%02x%02x' % (255 * red, 255 * green, 255 * blue)
 
+    def get_rgba_color(self, value):
+        red, green, blue = self.get_color(value)
+        return int(255 * red), int(255 * green), int(255 * blue), 255
+
 
 class BWGradient(RGBGradient):
     def __init__(self, interval, *args, **kwargs):

@@ -1,6 +1,7 @@
 '''
 Module containing the base class for all plotters (defining their API).
 '''
+from brp.core.exceptions import NotImplementedError
 
 
 class BasePlotter(object):
@@ -20,3 +21,6 @@ class BasePlotter(object):
         '''Draw the graphical element that is represented by this plotter.'''
         pass
 
+    def rdraw(self, root_element, x_transform, y_transform, svg_bbox):
+        '''Draw rasterized fallback.'''
+        raise NotImplementedError()

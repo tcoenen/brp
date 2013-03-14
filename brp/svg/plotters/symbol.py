@@ -35,6 +35,21 @@ class BaseSymbol(object):
         ny = y_transform(datapoint[1])
         self.draw_xy(root_element, nx, ny, *datapoint, **kwargs)
 
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
+        nx = x_transform(datapoint[0])
+        ny = y_transform(datapoint[1])
+
+        rgba_color = kwargs.get('rgba_color', (0, 0, 0, 255))
+        # see the PIL documentation of ImageDraw module for what follows:
+        X = 1
+        bbox = [
+            nx - (self.size),
+            ny - (self.size),
+            nx + (self.size) + X,
+            ny + (self.size) + X,
+        ]
+        imdraw.ellipse(bbox, fill=rgba_color, outline=rgba_color)
+
 
 class NoSymbol(BaseSymbol):
     def __init__(self, *args, **kwargs):
@@ -45,6 +60,9 @@ class NoSymbol(BaseSymbol):
 
     def draw(self, root_element, x_transform, y_transform, *datapoint,
              **kwargs):
+        pass
+
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
         pass
 
 
@@ -65,6 +83,21 @@ class SquareSymbol(BaseSymbol):
 
         if 'color' in kwargs:
             p.set('fill', kwargs['color'])
+
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
+        nx = x_transform(datapoint[0])
+        ny = y_transform(datapoint[1])
+
+        rgba_color = kwargs.get('rgba_color', (0, 0, 0, 255))
+        size = self.size
+
+        rect = [
+            (nx - size, ny - size),
+            (nx - size, ny + size),
+            (nx + size, ny + size),
+            (nx + size, ny - size)
+        ]
+        imdraw.polygon(rect, fill=rgba_color)
 
 
 class VerticalErrorBarSymbol(BaseSymbol):
@@ -171,6 +204,7 @@ class LineSymbol(BaseSymbol):
         if 'color' in kwargs:
             l.set('stroke', kwargs['color'])
 
+
 class RADECSymbol(BaseSymbol):
     '''
     Plot the Right Ascension and Declination as the hands on a clock.
@@ -238,3 +272,47 @@ class CrossHairSymbol(BaseSymbol):
 
         if 'color' in kwargs:
             d.set('stroke', kwargs['color'])
+
+
+class RasterDebugSymbol(object):
+    def __init__(self, *args, **kwargs):
+        '''Shows (mis-)alignment of PNG (raster) and SVG coordinates.'''
+        self.size = kwargs.get('size', 2)
+        self.size = kwargs.get('radius', 5)
+        self.link = kwargs.get('link', '')
+
+    def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
+        link = kwargs.get('link', self.link)
+
+        if link:
+            root_element = ET.SubElement(root_element, 'a')
+            root_element.set('xlink:href', link)
+
+        p = ET.SubElement(root_element, 'circle')
+        p.set('cx', '%.2f' % x)
+        p.set('cy', '%.2f' % y)
+        p.set('r', '%.2f' % self.size)
+        p.set('fill', 'none')
+        p.set('stroke', 'lime')
+
+    def draw(self, root_element, x_transform, y_transform, *datapoint,
+             **kwargs):
+        nx = x_transform(datapoint[0])
+        ny = y_transform(datapoint[1])
+        self.draw_xy(root_element, nx, ny, *datapoint, **kwargs)
+
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
+        nx = x_transform(datapoint[0])
+        ny = y_transform(datapoint[1])
+
+        rgba_color = kwargs.get('rgba_color', (0, 255, 0, 255))
+        imdraw.point((nx, ny), fill=rgba_color)
+
+        size = 5
+        bbox = [
+            nx - size,
+            ny - size,
+            nx + size,
+            ny + size,
+        ]
+        imdraw.ellipse(bbox, fill=None, outline=rgba_color)

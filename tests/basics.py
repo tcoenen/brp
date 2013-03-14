@@ -8,6 +8,7 @@ from brp.svg.plotters.symbol import BaseSymbol, SquareSymbol, LineSymbol
 from brp.svg.plotters.symbol import HorizontalErrorBarSymbol
 from brp.svg.plotters.symbol import VerticalErrorBarSymbol, CrossHairSymbol
 from brp.svg.plotters.symbol import RADECSymbol
+from brp.svg.plotters.symbol import RasterDebugSymbol
 from brp.svg.plotters.line import LinePlotter
 from brp.svg.plotters.scatter import ScatterPlotter
 from brp.svg.plotters.gradient import RGBGradient, GradientPlotter
@@ -21,7 +22,7 @@ from brp.svg.plotters.linkbox import LinkBox
 
 if __name__ == '__main__':
     # Draw a simple scatter + line plot to SVG (dumped to standard out).
-    cv = SVGCanvas(1000, 2000)
+    cv = SVGCanvas(1000, 2500)
     c = PlotContainer(100, 100, 600, 400, background_color="white",
                       x_log=True, y_log=True)
     TMP = [10 * x + 10 for x in range(99)]
@@ -120,7 +121,7 @@ if __name__ == '__main__':
     c.right.hide_label()
     c.right.hide_tickmarklabels()
     c.add_plotter(ScatterPlotter(P, DM, RA, DEC, SIGMA, symbol=RADECSymbol,
-        gradient=gr2, gradient_i=4))
+                  gradient=gr2, gradient_i=4))
     cv.add_plot_container(c)
 
     c = PlotContainer(620, 1500, 120, 400, data_padding=0)
@@ -132,4 +133,23 @@ if __name__ == '__main__':
     c.add_plotter(GradientPlotter(gr2))
     cv.add_plot_container(c)
 # ------------------------------------------------------
+# -- For debugging raster fallback ---------------------
+
+# The raster fallback might still have some off-by-one problems.
+
+    gr = RGBGradient((0, 25), (0, 0, 1), (1, 0, 0))
+    gr2 = RGBGradient((0, 25), (1, 0, 0), (0, 0, 1))
+    c = PlotContainer(100, 1900, 600, 400)
+    xdata = list(range(25))
+    c.add_plotter(ScatterPlotter(xdata, symbols=[RasterDebugSymbol]), True)
+    c.add_plotter(ScatterPlotter(xdata, symbols=[RasterDebugSymbol]))
+    xdata.reverse()
+    colors = ['yellow' for x in xdata]
+    c.add_plotter(ScatterPlotter(xdata, symbols=[BaseSymbol], colors=colors))
+    c.add_plotter(ScatterPlotter(xdata, gradient=gr, gradient_i=0), True)
+    cv.add_plot_container(c)
+
+#
+# ------------------------------------------------------
+
     cv.draw(sys.stdout)
