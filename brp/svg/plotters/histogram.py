@@ -12,22 +12,43 @@ def bin_data(lx, n_bins, normed=False):
     '''
     m = min(lx)
     M = max(lx)
-    interval = M - m
-    bin_width = interval / n_bins
-    bin_edges = [m + i * bin_width for i in range(n_bins + 1)]
+    interval = (M - m)
+    # n_bins - 1, because you want 0.5 bins 'overhang' at either end of the
+    # histogram.
+    bin_width = interval / (n_bins - 1)
+    bin_edges = [m + (i - 0.5) * bin_width for i in range(n_bins + 1)]
     bin_values = [0 for i in range(n_bins)]
+
     for x in lx:
         index = int((x - m) / bin_width)
         try:
             bin_values[index] += 1
         except IndexError:
             bin_values[-1] += 1
+
     if normed:
         factor = 1 / max(bin_values)
         for i in range(n_bins):
             bin_values[i] /= factor
+
     return [(bin_edges[i], bin_edges[i + 1], bin_values[i])
             for i in range(n_bins)]
+
+
+def bin_data_log(lx, n_bins, normed=False):
+    '''
+    Bin data with logarithmically sized bins.
+    '''
+    # Just take the logarithm of all data points and call the normal binning
+    # function, and fix the bin edges thereafter.
+    log_lx = [log10(x) for x in lx]
+    log_bins = bin_data(log_lx, n_bins, normed)
+
+    bins = []
+    for x1, x2, v in log_bins:
+        bins.append((10 ** x1, 10 ** x2, v))
+
+    return bins
 
 
 def merge_bins(binned_data):
