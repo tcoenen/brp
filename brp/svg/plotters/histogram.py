@@ -20,14 +20,14 @@ def bin_data(lx, n_bins, normed=False):
         index = int((x - m) / bin_width)
         try:
             bin_values[index] += 1
-        except IndexError, e:
+        except IndexError:
             bin_values[-1] += 1
     if normed:
         factor = 1 / max(bin_values)
         for i in range(n_bins):
             bin_values[i] /= factor
-    return [(bin_edges[i], bin_edges[i+1], bin_values[i]) \
-        for i in range(n_bins)]
+    return [(bin_edges[i], bin_edges[i + 1], bin_values[i])
+            for i in range(n_bins)]
 
 
 def merge_bins(binned_data):
@@ -99,9 +99,11 @@ class HistogramPlotter(BasePlotter):
             if i == 0:
                 x1, x2, y = self.binned_data[0]
                 if self.orientation == 'horizontal':
-                    points.append('%.2f,%.2f' % (x_transform(x1), y_transform(y)))
+                    points.append('%.2f,%.2f' % (x_transform(x1),
+                                  y_transform(y)))
                 else:
-                    points.append('%.2f,%.2f' % (x_transform(y), y_transform(x1)))
+                    points.append('%.2f,%.2f' % (x_transform(y),
+                                  y_transform(x1)))
             else:
                 x1, x2, y = self.binned_data[i]
                 previous_x1, previous_x2, previous_y = self.binned_data[i - 1]
@@ -130,17 +132,22 @@ class HistogramPlotter(BasePlotter):
                     pl.set('fill', 'none')
                     pl.set('points', ' '.join(points))
                     if self.line_pattern:
-                        pl.set('style', 'stroke-dasharray:%s' % self.line_pattern)
+                        pl.set('style', 'stroke-dasharray:%s' %
+                               self.line_pattern)
                     if self.orientation == 'horizontal':
-                        points = ['%.2f,%.2f' % (x_transform(x1), y_transform(y))]
+                        points = ['%.2f,%.2f' % (x_transform(x1),
+                                  y_transform(y))]
                     else:
-                        points = ['%.2f,%.2f' % (x_transform(y), y_transform(x1))]
+                        points = ['%.2f,%.2f' % (x_transform(y),
+                                  y_transform(x1))]
             if i == L - 1:
                 x1, x2, y = self.binned_data[-1]
                 if self.orientation == 'horizontal':
-                    points.append('%.2f,%.2f' % (x_transform(x2), y_transform(y)))
+                    points.append('%.2f,%.2f' % (x_transform(x2),
+                                  y_transform(y)))
                 else:
-                    points.append('%.2f,%.2f' % (x_transform(y), y_transform(x2)))
+                    points.append('%.2f,%.2f' % (x_transform(y),
+                                  y_transform(x2)))
                 pl = ET.SubElement(root_element, 'polyline')
                 pl.set('stroke', self.color)
                 pl.set('fill', 'none')
