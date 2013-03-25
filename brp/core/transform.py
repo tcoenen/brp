@@ -43,6 +43,17 @@ def setup_transform_1d(interval, target_interval, log=False):
     2.0
     '''
 
+    # If interval is zero length: stretch it
+    # TODO XXX: See whether this is more at home somewhere else
+    if interval[0] == interval[1]:
+        tmp = abs(interval[0])
+        if tmp > 0:
+            pot = int(log10(tmp))
+            delta = 10 ** (pot - 1)
+        else:  # in case interval[0] == 0
+            delta = 0.1
+        interval = (interval[0] - delta, interval[0] + delta)
+
     if log:  # 'Logarithmic' transform.
         scale = (target_interval[1] - target_interval[0]) / \
             (log10(interval[1]) - log10(interval[0]))

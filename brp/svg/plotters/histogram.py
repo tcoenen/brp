@@ -12,6 +12,18 @@ def bin_data(lx, n_bins, normed=False):
     '''
     m = min(lx)
     M = max(lx)
+
+    # TODO XXX : remove this hack:
+    if m == M:
+        tmp = abs(m)
+        if tmp > 0:
+            pot = int(log10(tmp))
+            delta = 10 ** (pot - 1)
+        else:  # in case interval[0] == 0
+            delta = 0.1
+        m = m - delta
+        M = M + delta
+
     interval = (M - m)
     # n_bins - 1, because you want 0.5 bins 'overhang' at either end of the
     # histogram.
