@@ -135,19 +135,21 @@ if __name__ == '__main__':
 # ------------------------------------------------------
 # -- For debugging raster fallback ---------------------
 
+# Note: this also tests the 'new' shortcuts on SVGCanvas and PlotContainer
+
 # The raster fallback might still have some off-by-one problems.
 
     gr = RGBGradient((0, 25), (0, 0, 1), (1, 0, 0))
     gr2 = RGBGradient((0, 25), (1, 0, 0), (0, 0, 1))
     c = PlotContainer(100, 1900, 600, 400)
     xdata = list(range(25))
-    c.add_plotter(ScatterPlotter(xdata, symbols=[RasterDebugSymbol]), True)
-    c.add_plotter(ScatterPlotter(xdata, symbols=[RasterDebugSymbol]))
+    c.add(ScatterPlotter(xdata, symbols=[RasterDebugSymbol]), True)
+    c.add(ScatterPlotter(xdata, symbols=[RasterDebugSymbol]))
     xdata.reverse()
     colors = ['yellow' for x in xdata]
-    c.add_plotter(ScatterPlotter(xdata, symbols=[BaseSymbol], colors=colors))
-    c.add_plotter(ScatterPlotter(xdata, gradient=gr, gradient_i=0), True)
-    cv.add_plot_container(c)
+    c.add(ScatterPlotter(xdata, symbols=[BaseSymbol], colors=colors))
+    c.add(ScatterPlotter(xdata, gradient=gr, gradient_i=0), True)
+    cv.add(c)
 
 #
 # ------------------------------------------------------

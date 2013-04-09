@@ -8,6 +8,7 @@ from brp.svg.plotters.axes import LeftAxisPlotter
 from brp.svg.plotters.axes import BottomAxisPlotter
 from brp.svg.plotters.axes import TopAxisPlotter
 from brp.svg.plotters.axes import RightAxisPlotter
+from brp.svg.plotters.base import BasePlotter
 
 from brp.core.bbox import stretch_bbox
 from brp.core.transform import setup_transforms
@@ -40,8 +41,22 @@ class SVGCanvas(object):
 
             * `plot_container` --- Add a brp.svg.base.PlotContainer
 
+        Note: Only here for backwards compatability, use .add() method instead.
         '''
         self.containers.append(plot_container)
+
+    def add(self, plottable):
+        '''
+        Add plottable to SVGCanvas.
+
+        Note currently these plottables are subclasses of:
+        brp.svg.base.PlotContainer and brp.svg.base.TextFragment .
+        '''
+        if isinstance(plottable, PlotContainer) or \
+                isinstance(plottable, TextFragment):
+            self.containers.append(plottable)
+        else:
+            raise Exception('This cannot be added to an SVGCanvas.')
 
     def draw(self, file):
         '''
@@ -135,8 +150,19 @@ class PlotContainer(object):
     def add_plotter(self, plotter, raster=False):
         '''
         Add a BasePlotter sub-class instance to this PlotContainer.
+
+        Note: Only here for backwards compatability, use .add() method instead.
         '''
         self.plot_layers.append((plotter, raster))
+
+    def add(self, plotter, raster=False):
+        '''
+        Add a BasePlotter sub-class instance to this PlotContainer.
+        '''
+        if isinstance(plotter, BasePlotter):
+            self.plot_layers.append((plotter, raster))
+        else:
+            raise Exception('This cannot be added to a PlotContainer.')
 
     def draw(self, root_element):
         '''Draw this PlotContainer.'''
