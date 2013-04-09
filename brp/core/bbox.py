@@ -100,3 +100,42 @@ def combine_bbox(bbox1, bbox2):
     bbox2 = list(bbox2)
     return tuple([min(bbox1[0], bbox2[0]), min(bbox1[1], bbox2[1]),
                  max(bbox1[2], bbox2[2]), max(bbox1[3], bbox2[3])])
+
+
+def check_bbox_intervals(bbox, x_log, y_log):
+    '''
+    Ensure that bounding box has interval for each dimension (not 1 value).
+    '''
+    bbox = list(bbox)
+
+    if x_log:
+        if bbox[0] == bbox[2]:
+            bbox[0] /= 10
+            bbox[2] *= 10
+    else:
+        if bbox[0] == bbox[2]:
+            tmp = abs(bbox[0])
+            if tmp > 0:
+                pot = int(log10(tmp))
+                delta = 10 ** (pot - 1)
+            else:
+                delta = 0.1
+            bbox[0] -= delta
+            bbox[2] += delta
+
+    if y_log:
+        if bbox[1] == bbox[3]:
+            bbox[0] /= 10
+            bbox[2] *= 10
+    else:
+        if bbox[1] == bbox[3]:
+            tmp = abs(bbox[1])
+            if tmp > 0:
+                pot = int(log10(tmp))
+                delta = 10 ** (pot - 1)
+            else:
+                delta = 0.1
+            bbox[1] -= delta
+            bbox[3] += delta
+
+    return tuple(bbox)

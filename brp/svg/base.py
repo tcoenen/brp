@@ -10,7 +10,7 @@ from brp.svg.plotters.axes import TopAxisPlotter
 from brp.svg.plotters.axes import RightAxisPlotter
 from brp.svg.plotters.base import BasePlotter
 
-from brp.core.bbox import stretch_bbox
+from brp.core.bbox import stretch_bbox, check_bbox_intervals
 from brp.core.transform import setup_transforms
 from brp.core.exceptions import NotImplementedError
 
@@ -125,14 +125,13 @@ class PlotContainer(object):
         self.color = kwargs.get('color', 'black')
         self.data_padding = kwargs.get('data_padding', DATA_PADDING)
 
-        self.left = LeftAxisPlotter(log=kwargs.get('y_log', False),
-                                    color=self.color)
-        self.top = TopAxisPlotter(log=kwargs.get('x_log', False),
-                                  color=self.color)
-        self.right = RightAxisPlotter(log=kwargs.get('y_log', False),
-                                      color=self.color)
-        self.bottom = BottomAxisPlotter(log=kwargs.get('x_log', False),
-                                        color=self.color)
+        self.x_log = kwargs.get('x_log', False)
+        self.y_log = kwargs.get('y_log', False)
+
+        self.left = LeftAxisPlotter(log=self.y_log, color=self.color)
+        self.top = TopAxisPlotter(log=self.x_log, color=self.color)
+        self.right = RightAxisPlotter(log=self.y_log, color=self.color)
+        self.bottom = BottomAxisPlotter(log=self.x_log, color=self.color)
 
         self.draw_axes = True
         self.x_min_range = kwargs.get('x_min_range', None)
@@ -187,6 +186,9 @@ class PlotContainer(object):
             tmp[1] = min(tmp[1], self.y_min_range[0])
             tmp[3] = max(tmp[3], self.y_min_range[1])
             self.data_bbox = tuple(tmp)
+        # Check that each of the axis covers some range and if not make it so.
+        self.data_bbox = check_bbox_intervals(self.data_bbox, self.x_log,
+                                              self.y_log)
 
         # Add some white space around the plot.
         x_available = self.svg_bbox[2] - self.svg_bbox[0] - 2 * AXIS_SIZE
@@ -196,7 +198,6 @@ class PlotContainer(object):
         y_available = self.svg_bbox[3] - self.svg_bbox[1] - 2 * AXIS_SIZE
         y_used = y_available - 2 * self.data_padding
         y_factor = y_available / y_used
-#        x_factor, y_factor = 1.2, 1.2
 
         self.data_bbox = stretch_bbox(self.data_bbox, x_factor, y_factor,
             self.top.kwargs['log'] or self.bottom.kwargs['log'],
