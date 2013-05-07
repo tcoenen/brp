@@ -7,22 +7,26 @@ from brp.svg.plotters.base import BasePlotter
 from brp.svg.et_import import ET
 
 
+def fix_gradient_interval(interval):
+    '''
+    If begin and end points of interval are the same, stretch interval.
+    '''
+    if interval[0] == interval[1]:
+        tmp = abs(interval[0])
+        if tmp > 0:
+            pot = int(log10(tmp))
+            delta = 10 ** (pot - 1)
+        else:  # in case interval[0] == 0
+            delta = 0.1
+        interval = (interval[0] - delta, interval[0] + delta)
+    return interval
+
+
 class RGBGradient(object):
     def __init__(self, interval, rgb1, rgb2, *args, **kwargs):
+        # Prevent divide-by-zero when setting up color transform.
+        self.interval = fix_gradient_interval(interval)
         # colors channels have values between 0 and 1
-        self.interval = interval
-
-        # If interval is zero length: stretch it
-        # TODO XXX: See whether this is more at home somewhere else
-        if self.interval[0] == self.interval[1]:
-            tmp = abs(self.interval[0])
-            if tmp > 0:
-                pot = int(log10(tmp))
-                delta = 10 ** (pot - 1)
-            else:  # in case interval[0] == 0
-                delta = 0.1
-            self.interval = (interval[0] - delta, interval[0] + delta)
-
         self.rgb1 = rgb1
         self.rgb2 = rgb2
         self.min_value = kwargs.get('min_value', None)
