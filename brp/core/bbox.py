@@ -125,8 +125,8 @@ def check_bbox_intervals(bbox, x_log, y_log):
 
     if y_log:
         if bbox[1] == bbox[3]:
-            bbox[0] /= 10
-            bbox[2] *= 10
+            bbox[1] /= 10
+            bbox[3] *= 10
     else:
         if bbox[1] == bbox[3]:
             tmp = abs(bbox[1])
