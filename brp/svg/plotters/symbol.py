@@ -252,6 +252,29 @@ class RADECSymbol(BaseSymbol):
             h1.set('stroke', kwargs['color'])
             h2.set('stroke', kwargs['color'])
 
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
+        ra = datapoint[2]
+        dec = datapoint[3]
+
+        nx = x_transform(datapoint[0])
+        ny = y_transform(datapoint[1])
+
+        rgba_color = kwargs.get('rgba_color', (0, 0, 0, 255))
+        # see the PIL documentation of ImageDraw module for what follows:
+        DEC_SIZE = 7
+        RA_SIZE = 12
+        # following is wrong:
+        dec_pointer_dx = math.cos(math.pi * dec / 180) * DEC_SIZE
+        dec_pointer_dy = -math.sin(math.pi * dec / 180) * DEC_SIZE
+        # following is ok:
+        ra_pointer_dx = math.sin(ra * math.pi / 12) * RA_SIZE
+        ra_pointer_dy = -math.cos(ra * math.pi / 12) * RA_SIZE
+
+        imdraw.line([nx, ny, nx + dec_pointer_dx, ny + dec_pointer_dy],
+                    fill=rgba_color, width=3)
+        imdraw.line([nx, ny, nx + ra_pointer_dx, ny + ra_pointer_dy],
+                    fill=rgba_color, width=1)
+
 
 class CrossHairSymbol(BaseSymbol):
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
