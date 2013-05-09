@@ -63,16 +63,18 @@ def bin_data_log(lx, n_bins, normed=False):
     return bins
 
 
-def merge_bins(binned_data):
+def merge_bins(bins):
     out = []
-    last = binned_data.pop()
-    while binned_data:
-        current = binned_data.pop()
-        if current[2] == last[2] and current[0] == last[1]:
-            last = (last[0], current[1], current[2])
+    begin_x, last_x, value = bins[0]
+
+    for x1, x2, v in bins[1:]:
+        if x1 == last_x and v == value:
+            last_x = x2
         else:
-            out.append(last)
-            last = current
+            out.append((begin_x, last_x, value))
+            begin_x, last_x, value = x1, x2, v
+    out.append((begin_x, last_x, value))
+
     return out
 
 
