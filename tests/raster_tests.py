@@ -9,6 +9,7 @@ from brp.svg.base import PlotContainer
 from brp.svg.plotters.scatter import ScatterPlotter
 from brp.svg.plotters.error import ErrorPlotter
 from brp.svg.plotters.symbol import RADECSymbol, SquareSymbol
+from brp.svg.plotters.line import LinePlotter
 
 if __name__ == '__main__':
 
@@ -111,6 +112,20 @@ if __name__ == '__main__':
 
     cv.add(c)
 
+# ------------------------------------------------------
+# -- For debugging line plot raster fallback -----------
+
+    c = PlotContainer(0, 1200, 600, 400)
+    data_y = [10, 20, 30, 40, 50, 40, 30, 20, 10, 10]
+    data_x = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    c.add(LinePlotter(data_x, data_y))
+    cv.add(c)
+
+    c = PlotContainer(600, 1200, 600, 400)
+    data_y = [10, 20, 30, 40, 50, 40, 30, 20, 10, 10]
+    data_x = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    c.add(LinePlotter(data_x, data_y), raster=True)
+    cv.add(c)
 
 # ------------------------------------------------------
 # ------------------------------------------------------
