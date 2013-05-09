@@ -246,7 +246,9 @@ class PlotContainer(object):
                 # Add explicit check for logarithmic axes, if present
                 # blow up for now. (maybe?)
                 xtr2, ytr2 = setup_transforms(self.data_bbox, img_bbox,
-                                              x_log=False, y_log=False)
+                    x_log=self.top.kwargs['log'] or self.bottom.kwargs['log'],
+                    y_log=self.left.kwargs['log'] or self.right.kwargs['log']
+                )
                 try:
                     p_layer.rdraw(root_element, xtr2, ytr2, svg_target_bbox)
                 except NotImplementedError:

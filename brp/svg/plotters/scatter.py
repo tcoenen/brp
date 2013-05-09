@@ -114,9 +114,9 @@ class ScatterPlotter(BasePlotter):
         # above should be hidden (not re-implemented in each subclass)
         if self.gradient and self.gradient_i is not None:
             for i, datapoint in enumerate(izip(*self.datapoints)):
+                rgba_color = self.gradient.get_rgba_color(
+                    datapoint[self.gradient_i])
                 for s in self.symbols:
-                    rgba_color = self.gradient.get_rgba_color(
-                        datapoint[self.gradient_i])
                     s.rdraw(imdraw, x_transform, y_transform, *datapoint,
                             rgba_color=rgba_color)
         elif self.colors:

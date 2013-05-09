@@ -2,6 +2,7 @@
 Implementation of the various symbols that show up in scatter and line plots.
 '''
 from __future__ import division
+import sys
 #from xml.sax.saxutils import escape
 
 from brp.svg.et_import import ET
@@ -143,6 +144,19 @@ class VerticalErrorBarSymbol(BaseSymbol):
         self.draw_xy(root_element, tx, ty, *datapoint, miny=tmy, maxy=tMy,
                      **kwargs)
 
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
+        nx = x_transform(datapoint[0])
+        rgba_color = kwargs.get('rgba_color', (0, 0, 0, 255))
+        # Should not be called without error.
+        err_y = kwargs['err_y']
+
+        miny = y_transform(datapoint[1] - err_y[0])
+        maxy = y_transform(datapoint[1] + err_y[1])
+
+        imdraw.line([nx, miny, nx, maxy], fill=rgba_color, width=1)
+        imdraw.line([nx - 3, miny, nx + 3, miny], fill=rgba_color, width=1)
+        imdraw.line([nx - 3, maxy, nx + 3, maxy], fill=rgba_color, width=1)
+
 
 class HorizontalErrorBarSymbol(BaseSymbol):
     def draw_xy(self, root_element, x, y, *datapoint, **kwargs):
@@ -186,6 +200,19 @@ class HorizontalErrorBarSymbol(BaseSymbol):
 
         self.draw_xy(root_element, tx, ty, *datapoint, minx=tmx, maxx=tMx,
                      **kwargs)
+
+    def rdraw(self, imdraw, x_transform, y_transform, *datapoint, **kwargs):
+        ny = y_transform(datapoint[1])
+        rgba_color = kwargs.get('rgba_color', (0, 0, 0, 255))
+
+        err_x = kwargs['err_x']
+
+        minx = x_transform(datapoint[0] - err_x[0])
+        maxx = x_transform(datapoint[0] + err_x[1])
+
+        imdraw.line([minx, ny, maxx, ny], fill=rgba_color, width=1)
+        imdraw.line([minx, ny - 3, minx, ny + 3], fill=rgba_color, width=1)
+        imdraw.line([maxx, ny - 3, maxx, ny + 3], fill=rgba_color, width=1)
 
 
 class LineSymbol(BaseSymbol):
