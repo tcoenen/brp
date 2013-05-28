@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # Histogram testing:
     c = PlotContainer(100, 500, 600, 400, background_color="white",
-                      x_log=False, y_log=False)
+                      x_log=False, y_log=False, data_background_color='yellow')
 
     cp = LegendPlotter(position=UNDER_PLOT)
     colors = ['green', 'blue', 'red', 'gray', 'yellow', 'orange', 'lime']

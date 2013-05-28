@@ -124,6 +124,7 @@ class PlotContainer(object):
         self.background_color = kwargs.get('background_color', None)
         self.color = kwargs.get('color', 'black')
         self.data_padding = kwargs.get('data_padding', DATA_PADDING)
+        self.data_background_color = kwargs.get('data_background_color', None)
 
         self.x_log = kwargs.get('x_log', False)
         self.y_log = kwargs.get('y_log', False)
@@ -231,6 +232,12 @@ class PlotContainer(object):
                           y='%.2f' % svg_y_min,
                           width='%.2f' % (svg_x_max - svg_x_min),
                           height='%.2f' % (svg_y_max - svg_y_min))
+        if self.data_background_color is not None:
+            ET.SubElement(root_element, 'rect', fill=self.data_background_color,
+                          x='%.2f' % (svg_x_min + AXIS_SIZE),
+                          y='%.2f' % (svg_y_min + AXIS_SIZE),
+                          width='%.2f' % (svg_x_max - svg_x_min - 2 * AXIS_SIZE),
+                          height='%.2f' % (svg_y_max - svg_y_min - 2 * AXIS_SIZE))
 
         # Draw all the parts of the plot.
         for p_layer, use_raster_fallback in self.plot_layers:
